@@ -1,0 +1,37 @@
+{
+  "nav": { "docs": "Docs" },
+  "landing": {
+    "hero": {
+      "title": "Your types were always the contract. Now they're enforced.",
+      "subtitle": "TS Typed instruments the TypeScript you already wrote to validate your data at runtime — no duplicate schema, no decorator-per-field, no drift between what your types say and what your code actually checks."
+    },
+    "cta": { "start": "Get Started" },
+    "features": {
+      "noSchema": { "title": "No schema duplication", "body": "Your existing TypeScript types ARE the runtime contract. Nothing else to keep in sync." },
+      "valueObject": { "title": "Auto-constructed value types", "body": "Declare a field as CPF, Email, or your own ValueObject — a raw value crossing that boundary becomes a validated instance automatically." },
+      "nestjs": { "title": "NestJS integration", "body": "A ready-made exception filter maps violations to safe HTTP responses, with per-field custom messages and entity/DTO disambiguation." },
+      "validators": { "title": "Validators package", "body": "Email, CPF, CNPJ, and more — real validation logic, not just string types." },
+      "safeErrors": { "title": "Safe by default", "body": "StrictTypeError never leaks the raw value or a stack trace to a client." },
+      "opensource": { "title": "Open source", "body": "Apache-2.0, on GitHub, built in the open." }
+    },
+    "example": {
+      "title": "See it in action",
+      "code": "class CreateUserDto {\n  public readonly cpf!: CPF;\n  public readonly email!: Email;\n}\n\n// client sends raw strings — TS Typed validates and\n// auto-constructs both fields, no decorators needed."
+    },
+    "metrics": { "stars": "GitHub stars", "downloads": "Monthly npm downloads" }
+  },
+  "docs": {
+    "nav": {
+      "introduction": "Introduction",
+      "gettingStarted": "Getting Started",
+      "coreConcepts": "Core Concepts",
+      "configuration": "Configuration",
+      "decorators": "Decorators",
+      "valueObject": "ValueObject",
+      "generics": "Generics",
+      "nestjs": "NestJS Integration",
+      "validators": "Validators",
+      "limitations": "Known Limitations"
+    }
+  }
+}

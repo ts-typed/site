@@ -1,0 +1,37 @@
+{
+  "nav": { "docs": "Docs" },
+  "landing": {
+    "hero": {
+      "title": "Seus tipos sempre foram o contrato. Agora eles são aplicados.",
+      "subtitle": "O TS Typed instrumenta o TypeScript que você já escreveu para validar seus dados em tempo de execução — sem schema duplicado, sem decorator por campo, sem divergência entre o que seu tipo diz e o que seu código realmente verifica."
+    },
+    "cta": { "start": "Comece agora" },
+    "features": {
+      "noSchema": { "title": "Sem schema duplicado", "body": "Seus tipos TypeScript existentes SÃO o contrato de runtime. Nada mais pra manter sincronizado." },
+      "valueObject": { "title": "Tipos de valor auto-construídos", "body": "Declare um campo como CPF, Email ou seu próprio ValueObject — um valor cru que cruza essa fronteira se torna uma instância validada automaticamente." },
+      "nestjs": { "title": "Integração com NestJS", "body": "Um filtro de exceção já pronto mapeia violações para respostas HTTP seguras, com mensagens customizadas por campo e distinção entre entidade e DTO." },
+      "validators": { "title": "Pacote de validadores", "body": "Email, CPF, CNPJ e mais — validação real, não só tipos de string." },
+      "safeErrors": { "title": "Seguro por padrão", "body": "StrictTypeError nunca expõe o valor cru ou stack trace pro cliente." },
+      "opensource": { "title": "Código aberto", "body": "Apache-2.0, no GitHub, construído publicamente." }
+    },
+    "example": {
+      "title": "Veja funcionando",
+      "code": "class CreateUserDto {\n  public readonly cpf!: CPF;\n  public readonly email!: Email;\n}\n\n// o cliente envia strings cruas — o TS Typed valida e\n// auto-constrói os dois campos, sem decorators."
+    },
+    "metrics": { "stars": "Estrelas no GitHub", "downloads": "Downloads mensais no npm" }
+  },
+  "docs": {
+    "nav": {
+      "introduction": "Introdução",
+      "gettingStarted": "Primeiros Passos",
+      "coreConcepts": "Conceitos Centrais",
+      "configuration": "Configuração",
+      "decorators": "Decorators",
+      "valueObject": "ValueObject",
+      "generics": "Genéricos",
+      "nestjs": "Integração NestJS",
+      "validators": "Validadores",
+      "limitations": "Limitações Conhecidas"
+    }
+  }
+}

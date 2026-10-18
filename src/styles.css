@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-royal: #2563eb;
+  --color-deep: #1e3a8a;
+  --color-cyan: #06b6d4;
+  --color-slate-bg: #0f172a;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  background-color: var(--color-slate-bg);
+  color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+}

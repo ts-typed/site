@@ -1,0 +1,119 @@
+# Core Concepts
+
+TS Typed is built around one idea: a value is checked where it crosses a **typed boundary**, against the type declared at that exact point. This page explains the idea, what is checked, and how violations are reported.
+
+## Typed boundaries
+
+A typed boundary is a place in your code where a value enters a declared type. The compiler finds every one of these in your project using the TypeScript type checker:
+
+- **Variable declarations**, such as `const user: User = input;`
+- **Function parameters**, when a caller passes an argument
+- **Return statements**, when a function produces a value
+- **Class field assignments**
+- **Casts**, such as `value as User`
+- **`satisfies` expressions**
+
+At each boundary, the compiler inserts a runtime check built from the declared type at that point. You do not write these checks, and you do not maintain a separate schema for them.
+
+```ts
+export function greet(user: { name: string; age: number }): string {
+  return `Hello, ${user.name}`;
+}
+```
+
+The parameter `user` is a typed boundary. Calls that pass a value with the wrong shape fail at the point of entry, before the function body runs.
+
+## What gets checked
+
+The runtime checks cover the types you already use:
+
+- **Primitives and literals**: `string`, `number`, `boolean`, `bigint`, `symbol`, and literal types. `null` and `undefined` are distinguished correctly. `NaN` and `Infinity` are accepted as ordinary numbers, with no domain checks applied.
+- **Unions, intersections, and tuples**, including template literal types.
+- **Objects are closed by default.** An object with an extra, undeclared property fails with `EXTRA_PROPERTY`. This is stricter than plain TypeScript, which allows extra properties in many positions. To opt out, use the `AllowExtraProperties()` decorator on a class or set the `allowExtraPropertiesAll` config flag.
+- **Dates.** `Date` is validated as a real `Date` instance, not as any object.
+- **Branded types.** A type such as `type UserId = string & { __brand: 'UserId' }` is accepted at its underlying primitive type.
+- **Classes.**
+  - `private` and `protected` fields are enforced when `compiler.enforcePrivate` is enabled.
+  - `readonly` fields are enforced when `compiler.enforceReadonly` is enabled. Fields declared with `?` or `!` are skipped, so libraries such as `class-transformer` can populate them after construction.
+  - Required fields are locked as non-configurable, starting from the most-derived constructor.
+  - `static` fields are checked.
+- **Destructuring.** In `const { age }: Profile = value;`, the whole source value is validated before any binding is extracted.
+- **Type guards and assertion functions.** A user-defined `x is T` validates its target when it returns `true`. An `asserts x is T` function validates at every normal return path.
+- **`Map`, `Set`, `ReadonlyMap`, and `ReadonlySet`.** Entries are validated against the declared key, value, and item types. `WeakMap` and `WeakSet` are not supported, because their contents cannot be iterated.
+- **Generators, `async`/`await`, and explicit-generic calls and constructors.**
+- **CommonJS module bindings.** An exported `let` or `var` is guarded on the `exports` object itself.
+
+## Errors: `StrictTypeError`
+
+Every violation throws a `StrictTypeError`. It is a subclass of `TypeError`, so existing `instanceof TypeError` handling keeps working.
+
+```ts
+class StrictTypeError extends TypeError {
+  code: 'TYPE_MISMATCH' | 'EXTRA_PROPERTY' | 'REQUIRED_PROPERTY' | 'READONLY_PROPERTY' | 'INVALID_MUTATION';
+  propertyPath: string;   // e.g. "CreateUserDto.email"
+  expected: string;
+  received: string;
+  contractKind: 'variable' | 'parameter' | 'property' | 'return' | ...;
+  operation: string;      // e.g. "initialize" | "set" | "argument" | "return" | "mutate"
+  className?: string;
+  functionName?: string;
+  toJSON(): {
+    code: string;
+    propertyPath: string;
+    expected: string;
+    received: string;
+    contractKind: string;
+    operation: string;
+    className?: string;
+    functionName?: string;
+  };
+}
+```
+
+Each field tells you something specific about the failure:
+
+- **`code`** classifies the violation:
+  - `TYPE_MISMATCH`: the value has the wrong type.
+  - `EXTRA_PROPERTY`: the object has a property the type does not declare.
+  - `REQUIRED_PROPERTY`: a required property is missing.
+  - `READONLY_PROPERTY`: a `readonly` field was written to after it was initialized.
+  - `INVALID_MUTATION`: a value was changed in a way the declared type does not allow.
+- **`propertyPath`** points to the failing location, such as `CreateUserDto.email`.
+- **`expected`** and **`received`** describe the declared type and the observed shape.
+- **`contractKind`** says what kind of boundary failed, such as a variable, parameter, property, or return value.
+- **`operation`** says what the runtime was doing, such as `initialize`, `set`, `argument`, `return`, or `mutate`.
+- **`className`** and **`functionName`** identify the enclosing class or function when they apply.
+
+### Safe to log
+
+`toJSON()` returns the fields above and nothing else. It never includes the raw value that failed validation, and it never includes a stack trace. You can log or serialize the error without leaking the input it rejected.
+
+```ts
+try {
+  createUser(payload);
+} catch (error) {
+  if (error instanceof StrictTypeError) {
+    logger.warn(error.toJSON());
+  }
+}
+```
+
+## Fail-fast behavior
+
+TS Typed is fail-fast. The first violation it finds throws immediately. It does not walk the whole object and collect every problem into one aggregated error, as some validation libraries do.
+
+Consider this input:
+
+```ts
+class CreateUserDto {
+  public name!: string;
+  public age!: number;
+  public email!: string;
+}
+
+createUser({ name: 42, age: 'thirty', email: 'ana@example.com' });
+```
+
+The check reports the first mismatch it reaches, for example `name`, and throws. It does not also report `age`. After you fix `name`, the next request may surface `age`.
+
+This keeps the failure path simple and cheap. The error describes one concrete problem, and the code that handles it never has to interpret a list of issues. If you need to report every problem to a client at once, validate the input in a dedicated layer before it reaches the typed boundary.
