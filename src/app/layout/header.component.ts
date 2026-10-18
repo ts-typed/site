@@ -18,13 +18,14 @@ import { SupportedLang } from '../services/language.service';
           <a [routerLink]="['/', lang, 'docs', 'introduction']" class="hover:text-cyan">{{ 'nav.docs' | translate }}</a>
           <a href="https://github.com/ts-typed" target="_blank" rel="noopener" class="hover:text-cyan">GitHub</a>
         </nav>
-        <button
-          type="button"
-          class="rounded-md border border-white/20 px-3 py-1 text-sm text-slate-200 hover:border-cyan hover:text-cyan"
-          (click)="toggleLang()"
+        <select
+          class="rounded-md border border-white/20 bg-transparent px-3 py-1 text-sm text-slate-200 hover:border-cyan hover:text-cyan focus:outline-none focus:border-cyan"
+          [value]="lang"
+          (change)="setLang($any($event.target).value)"
         >
-          {{ lang === 'en' ? 'PT' : 'EN' }}
-        </button>
+          <option value="pt">🇧🇷 PT-BR</option>
+          <option value="en">🇬🇧 EN</option>
+        </select>
       </div>
     </header>
   `,
@@ -37,8 +38,7 @@ export class HeaderComponent {
     return (this.translate.getCurrentLang() as SupportedLang) || 'en';
   }
 
-  public toggleLang(): void {
-    const next: SupportedLang = this.lang === 'en' ? 'pt' : 'en';
+  public setLang(next: SupportedLang): void {
     this.translate.use(next);
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('ts-typed-lang', next);
