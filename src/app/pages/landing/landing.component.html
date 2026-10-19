@@ -7,7 +7,7 @@
       {{ 'landing.hero.subtitle' | translate }}
     </p>
     <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-      <a routerLink="../docs/getting-started" class="rounded-md bg-royal px-6 py-3 font-semibold text-white hover:bg-deep">
+      <a [routerLink]="['/', lang, 'docs', 'getting-started']" class="rounded-md bg-royal px-6 py-3 font-semibold text-white hover:bg-deep">
         {{ 'landing.cta.start' | translate }}
       </a>
       <a href="https://github.com/ts-typed" target="_blank" rel="noopener" class="rounded-md border border-white/20 px-6 py-3 font-semibold text-slate-200 hover:border-cyan hover:text-cyan">
