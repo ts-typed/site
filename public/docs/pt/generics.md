@@ -1,10 +1,10 @@
 # Genéricos
 
-O TS Typed consegue validar valores que atravessam funções genéricas e classes genéricas. A ideia central é que o compilador precisa de um **tipo concreto** para montar um contrato em tempo de execução, então a cobertura depende de como o argumento de tipo é escrito no ponto de chamada.
+O TS Typed consegue validar valores que atravessam funções genéricas e classes genéricas. A ideia central é que o compilador precisa de um **tipo concreto** para montar um contrato em tempo de execução — e ele obtém esse tipo concreto diretamente do checker do TypeScript no ponto de chamada, seja o argumento de tipo escrito explicitamente ou deixado para o TypeScript inferir.
 
-## Argumentos de tipo explícitos
+## Argumentos de tipo explícitos e inferidos
 
-Chamar uma função genérica, ou construir uma classe genérica, **com um argumento de tipo explícito** valida tanto os argumentos quanto o resultado contra aquele tipo concreto, naquela chamada:
+Chamar uma função genérica, ou construir uma classe genérica, valida tanto os argumentos quanto o resultado contra o tipo concreto daquela chamada — com um argumento de tipo explícito ou inferido:
 
 ```ts
 interface Person {
@@ -17,15 +17,30 @@ function identity<T>(x: T): T {
 }
 
 identity<Person>(valorComFormatoErrado); // lança StrictTypeError, validado contra Person
+identity(valorComFormatoErrado);         // mesma verificação: T é inferido a partir do próprio argumento
 
 class Box<T> {
   constructor(public readonly value: T) {}
 }
 
 new Box<Person>(valorComFormatoErrado); // o mesmo, para construtores
+new Box(valorComFormatoErrado);         // e para uma chamada de construtor inferida
 ```
 
-Nos dois casos, o valor é verificado contra `Person` na fronteira. Se não corresponder, um `StrictTypeError` é lançado antes que o valor chegue ao corpo da função ou aos campos do objeto.
+Em todos os casos, o valor é verificado contra `Person` na fronteira. Se não corresponder, um `StrictTypeError` é lançado antes que o valor chegue ao corpo da função ou aos campos do objeto.
+
+O caso inferido não se limita a um tipo que vem do próprio argumento — também cobre um argumento de tipo guiado unicamente pelo tipo *esperado* no ponto de chamada, quando nenhum argumento o determina:
+
+```ts
+function response<T>(data: T): { data: T } {
+  return { data } as { data: T };
+}
+
+const user: Person = { name: 'Ada', age: 36 };
+const result = response(user); // T inferido como Person a partir de `user` — valida o formato completo { data: Person }
+```
+
+Isso funciona porque o `T` de `response(user)` é resolvido a partir do tipo já declarado de `user` — a mesma assinatura instanciada que um tooltip ao passar o mouse mostraria, sem precisar de `<Person>` explícito.
 
 ## Valores de retorno assíncronos
 
@@ -49,21 +64,20 @@ function collect<T>(...items: T[]): T[] {
 }
 
 collect<number>(1, 2, 'bad'); // lança StrictTypeError em 'bad'
+collect(1, 2, 'bad');         // mesma verificação: o TypeScript já rejeitaria isso em tempo de compilação
 
 const misturados: unknown[] = [1, 2, 'bad'];
 collect<number>(...misturados); // a mesma verificação, aplicada aos valores do spread
 ```
 
-## Argumentos de tipo inferidos não são cobertos
+## Quando a inferência não resolve para nada concreto
 
-> **Não coberto: argumentos de tipo inferidos.** Quando você omite o `<T>` explícito e deixa o TypeScript inferir o tipo, o TS Typed não valida a chamada:
->
-> ```ts
-> identity(valorComFormatoErrado); // sem verificação em tempo de execução: T é inferido, não escrito
-> ```
->
-> Dar suporte a isso significaria replicar a inferência de tipos do próprio compilador em cada ponto de chamada. É um problema separado, consideravelmente mais difícil, e está fora do escopo atual. Se você quer uma verificação em tempo de execução em uma chamada genérica, escreva o argumento de tipo explicitamente.
+Se um parâmetro de tipo não é referenciado por nenhum argumento e não há um tipo esperado no ponto de chamada para guiá-lo, o TypeScript o resolve como `unknown`. O TS Typed trata isso da mesma forma que trata qualquer outro tipo não suportado: nenhum contrato é gerado para essa fronteira, em vez de validar contra o tipo errado.
 
-Geradores também não são cobertos. Chamar uma função geradora produz um iterador, e não um único valor de retorno, e os valores emitidos com `yield` não são validados.
+## O que ainda não é coberto
+
+Geradores não são cobertos — chamar uma função geradora produz um iterador, e não um único valor de retorno, e os valores emitidos com `yield` não são validados.
+
+Um método cuja declaração genérica vive em uma das bibliotecas embutidas do próprio TypeScript (`Array.prototype.map`, `Promise.resolve`, os métodos do próprio `Map`/`Set`, o `new Map(...)`/`new Set(...)` em si, e assim por diante) é deliberadamente excluído deste recurso. Instrumentar esses casos significaria adicionar validação em tempo de execução a praticamente toda operação de array/coleção de um projeto — bem fora do escopo de validar as funções e classes genéricas PRÓPRIAS de um projeto — e alguns deles (`Map`/`Set`) já têm tratamento dedicado em outro lugar (validação de entradas, [`compiler.enforceMutationGuards`](./configuration.md)).
 
 Para a lista completa das fronteiras desta área, veja [Limitações](./limitations.md).

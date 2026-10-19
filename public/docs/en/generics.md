@@ -1,10 +1,10 @@
 # Generics
 
-TS Typed can validate values that pass through generic functions and generic classes. The key idea is that the compiler needs a **concrete type** to build a runtime contract, so coverage depends on how the type argument is written at the call site.
+TS Typed can validate values that pass through generic functions and generic classes. The key idea is that the compiler needs a **concrete type** to build a runtime contract — and it gets that concrete type from TypeScript's own checker at the call site, whether you wrote the type argument explicitly or left it for TypeScript to infer.
 
-## Explicit type arguments
+## Explicit and inferred type arguments
 
-Calling a generic function, or constructing a generic class, **with an explicit type argument** validates both the arguments and the result against that concrete type for that call:
+Calling a generic function, or constructing a generic class, validates both the arguments and the result against the concrete type for that call — with an explicit type argument or an inferred one:
 
 ```ts
 interface Person {
@@ -17,15 +17,30 @@ function identity<T>(x: T): T {
 }
 
 identity<Person>(wrongShapedValue); // throws StrictTypeError, validated against Person
+identity(wrongShapedValue);         // same check: T is inferred from the argument's own type
 
 class Box<T> {
   constructor(public readonly value: T) {}
 }
 
 new Box<Person>(wrongShapedValue); // same, for constructors
+new Box(wrongShapedValue);         // and for an inferred constructor call
 ```
 
-In both cases, the value is checked against `Person` at the boundary. If it does not match, a `StrictTypeError` is thrown before the value reaches the function body or the object's fields.
+In every case, the value is checked against `Person` at the boundary. If it does not match, a `StrictTypeError` is thrown before the value reaches the function body or the object's fields.
+
+The inferred case isn't limited to a type that comes from the argument itself — it also covers a type argument driven purely by the *expected* type at the call site, when no argument pins it down:
+
+```ts
+function response<T>(data: T): { data: T } {
+  return { data } as { data: T };
+}
+
+const user: Person = { name: 'Ada', age: 36 };
+const result = response(user); // T inferred as Person from `user` — validates the full { data: Person } shape
+```
+
+This works because `response(user)`'s `T` is resolved from `user`'s own declared type — the same instantiated signature a hover tooltip would show you, with no explicit `<Person>` needed.
 
 ## Async return values
 
@@ -49,21 +64,20 @@ function collect<T>(...items: T[]): T[] {
 }
 
 collect<number>(1, 2, 'bad'); // throws StrictTypeError on 'bad'
+collect(1, 2, 'bad');         // same check: TypeScript would reject this at compile time anyway
 
 const mixed: unknown[] = [1, 2, 'bad'];
 collect<number>(...mixed); // same check, applied to the spread values
 ```
 
-## Inferred type arguments are not covered
+## When inference can't resolve to anything concrete
 
-> **Not covered: inferred type arguments.** When you omit the explicit `<T>` and let TypeScript infer the type, TS Typed does not validate the call:
->
-> ```ts
-> identity(wrongShapedValue); // no runtime check: T is inferred, not written out
-> ```
->
-> Supporting this would mean replicating the compiler's own type inference at every call site. That is a separate and considerably harder problem, and it is outside the current scope. If you want a runtime check on a generic call, write the type argument explicitly.
+If a type parameter isn't referenced by any argument and there is no expected type at the call site to drive it from, TypeScript resolves it to `unknown`. TS Typed treats that the same way it treats any other unsupported type: no contract is generated for that boundary, rather than validating against the wrong thing.
 
-Generators are also not covered. Calling a generator function produces an iterator rather than a single return value, and the yielded values are not validated.
+## What's still not covered
+
+Generators are not covered — calling a generator function produces an iterator rather than a single return value, and the yielded values are not validated.
+
+A method whose generic declaration lives in one of TypeScript's own bundled libraries (`Array.prototype.map`, `Promise.resolve`, `Map`/`Set`'s own methods, `new Map(...)`/`new Set(...)` themselves, and so on) is deliberately excluded from this feature. Instrumenting those would mean adding runtime validation to essentially every array/collection operation in a project — far outside the scope of validating a project's OWN generic functions and classes — and some of them (`Map`/`Set`) already get dedicated handling elsewhere (entry validation, [`compiler.enforceMutationGuards`](./configuration.md)).
 
 For the complete list of boundaries in this area, see [Limitations](./limitations.md).

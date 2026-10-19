@@ -15,9 +15,9 @@ O TS Typed tem um escopo intencionalmente delimitado. As limitações abaixo sã
 
 ## Genéricos
 
-- **Argumentos de tipo genéricos inferidos não são transportados para dentro da chamada.** Uma chamada escrita sem `<T>` explícito não é validada.
-- **Expressões de construção com rest ou spread estão fora do suporte a genéricos explícitos.** Isso cobre `new Box<T>(x)` quando os argumentos incluem rest ou spread.
-- **Classes e métodos genéricos inferidos estão fora do suporte a genéricos explícitos.** Classes e métodos genéricos que não têm uma forma explícita de expressão de chamada não são cobertos.
+- **Classes e métodos genéricos sem forma de expressão de chamada não são cobertos.** Um valor genérico usado apenas como anotação de tipo, nunca de fato chamado ou construído, não dá ao compilador nenhum ponto de chamada do qual resolver uma assinatura instanciada.
+- **Um método cuja declaração genérica vive em uma das bibliotecas embutidas do próprio TypeScript é excluído.** `Array.prototype.map`, `Promise.resolve`, os métodos do próprio `Map`/`Set`, o `new Map(...)`/`new Set(...)` em si, e assim por diante, estão deliberadamente fora do escopo — veja [Genéricos](./generics.md#o-que-ainda-não-é-coberto) para entender o motivo.
+- **Geradores não são cobertos.** Chamar uma função geradora produz um iterador, e não um único valor de retorno, e os valores emitidos com `yield` não são validados.
 
 ## Saída de módulos
 

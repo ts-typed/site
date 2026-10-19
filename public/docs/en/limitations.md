@@ -15,9 +15,9 @@ TS Typed is intentionally scoped. The limitations below are **deliberate scope b
 
 ## Generics
 
-- **Inferred generic type arguments are not transported into a call.** A call written without an explicit `<T>` is not validated.
-- **Construct expressions with rest or spread are outside explicit-generics support.** This covers `new Box<T>(x)` when the arguments include rest or spread.
-- **Inferred generic classes and methods are outside explicit-generics support.** Generic classes and methods that have no explicit call-expression form are not covered.
+- **Generic classes and methods with no call-expression form are not covered.** A generic value used only as a type annotation, never actually called or constructed, gives the compiler no call site to resolve an instantiated signature from.
+- **A method whose generic declaration lives in one of TypeScript's own bundled libraries is excluded.** `Array.prototype.map`, `Promise.resolve`, `Map`/`Set`'s own methods, `new Map(...)`/`new Set(...)` themselves, and so on, are deliberately out of scope — see [Generics](./generics.md#whats-still-not-covered) for why.
+- **Generators are not covered.** Calling a generator function produces an iterator rather than a single return value, and the yielded values are not validated.
 
 ## Module output
 
