@@ -4,7 +4,7 @@ TS Typed is intentionally scoped. The limitations below are **deliberate scope b
 
 ## Validation model
 
-- **Multiple violations are not aggregated.** TS Typed validates and populates an object field by field, and throws on the first bad field. This differs from class-validator's model, which populates the whole object, validates it in one pass, and collects every violation. If you need every violation in one response, you will need to keep, or reintroduce, that kind of aggregate validation yourself.
+- **Multiple violations are not aggregated by default.** TS Typed validates and populates an object field by field, and throws on the first bad field. Decorating a class with [`AggregateErrors()`](./decorators.md#aggregateerrors) opts it into collecting every violation instead — but only at the parameter boundary, and only when the value reaching that boundary is still a plain, not-yet-instantiated object. **It has no effect on a value that `class-transformer`'s `plainToInstance` already constructed field by field** — the default behind NestJS's `ValidationPipe({ transform: true })` — because TS Typed's own per-field guard throws on the first bad field *during that construction*, before the finished object would ever reach the parameter boundary this decorator governs. A per-field `TypeErrorResponse()` override is also not folded into an `AggregateStrictTypeError`'s own fields; only the first violation's fields are, through inheritance. An array-typed **parameter itself** (`dtos: Dto[]`, as opposed to a nested array field) is not aggregated, and a namespace-qualified decorator call (`@someNamespace.AggregateErrors()`) is not detected.
 
 ## Collections
 

@@ -4,7 +4,7 @@ O TS Typed tem um escopo intencionalmente delimitado. As limitações abaixo sã
 
 ## Modelo de validação
 
-- **Violações múltiplas não são agregadas.** O TS Typed valida e preenche um objeto campo a campo, e lança erro na primeira falha. Isso difere do modelo do class-validator, que preenche o objeto inteiro, valida tudo em uma única passagem e coleta cada violação. Se você precisar de todas as violações em uma única resposta, terá de manter, ou reintroduzir, esse tipo de validação agregada por conta própria.
+- **Violações múltiplas não são agregadas por padrão.** O TS Typed valida e preenche um objeto campo a campo, e lança erro na primeira falha. Decorar uma classe com [`AggregateErrors()`](./decorators.md#aggregateerrors) faz ela coletar todas as violações em vez disso — mas só na fronteira de parâmetro, e só quando o valor que chega nessa fronteira ainda é um objeto simples, ainda não instanciado. **Não tem efeito num valor que o `plainToInstance` do `class-transformer` já construiu campo a campo** — o padrão por trás do `ValidationPipe({ transform: true })` do NestJS —, porque o próprio guard de campo do TS Typed lança erro no primeiro campo inválido *durante essa construção*, antes de o objeto completo chegar na fronteira de parâmetro que esse decorator rege. Uma sobrescrita por campo via `TypeErrorResponse()` também não é incorporada aos campos do `AggregateStrictTypeError`; só os campos da primeira violação são, por herança. Um **parâmetro** do tipo array (`dtos: Dto[]`, diferente de um campo array aninhado) não é agregado, e uma chamada de decorator qualificada por namespace (`@algumNamespace.AggregateErrors()`) não é detectada.
 
 ## Coleções
 

@@ -116,4 +116,6 @@ createUser({ name: 42, age: 'thirty', email: 'ana@example.com' });
 
 The check reports the first mismatch it reaches, for example `name`, and throws. It does not also report `age`. After you fix `name`, the next request may surface `age`.
 
-This keeps the failure path simple and cheap. The error describes one concrete problem, and the code that handles it never has to interpret a list of issues. If you need to report every problem to a client at once, validate the input in a dedicated layer before it reaches the typed boundary.
+This keeps the failure path simple and cheap. The error describes one concrete problem, and the code that handles it never has to interpret a list of issues.
+
+If you need every violation reported together — the class-validator-style model — decorate the class with `AggregateErrors()` and TS Typed will collect every violation it finds in a value crossing a parameter boundary, instead of stopping at the first. It is opt-in and narrowly scoped; see [`AggregateErrors()`](./decorators.md#aggregateerrors) for exactly where it applies and where it does not.

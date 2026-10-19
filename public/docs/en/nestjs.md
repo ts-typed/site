@@ -98,7 +98,25 @@ export class CreateUserDto {
 
 The decorator fires for **any** kind of violation on that field, including a wrong type, an extra property, or a write to a readonly field. It replaces only the `message` (and the `statusCode`, if you pass one). Every other diagnostic field still reaches the client, including `code`, `propertyPath`, `expected`, `received`, `contractKind`, and `operation`. The client gets your custom message and the full detail of what was wrong.
 
-Like the rest of TS Typed, this is a single-violation mechanism.
+Like the rest of TS Typed, this is a single-violation mechanism — pair it with `AggregateErrors()` below if you also need every violation in one response.
+
+## `AggregateErrors()`: collecting every violation in one response
+
+Decorate a DTO with `AggregateErrors()` (from `@ts-typed/compiler`) to collect every violation found in it — at any depth, including nested objects and an optional/nullable nested DTO — into one `AggregateStrictTypeError`, instead of TS Typed's default fail-fast behavior:
+
+```ts
+import { AggregateErrors } from '@ts-typed/compiler';
+
+@AggregateErrors()
+export class CreateUserDto {
+  public name: string = '';
+  public age: number = 0;
+}
+```
+
+No change is needed to `StrictTypeErrorFilter` or `StrictTypeHttpError`: `AggregateStrictTypeError extends StrictTypeError`, so the filter's existing `@Catch(StrictTypeError)` already catches it, and its `errors` array — every collected violation — is already included in the response body through the same `toJSON()`-spreading the filter always did.
+
+**This only takes effect when TS Typed is validating the incoming value structurally, as a plain object, at the parameter boundary** — the shape a request body has by default with no `ValidationPipe`, or with one configured `transform: false`. If your app uses Nest's own recommended `ValidationPipe({ transform: true })`, `class-transformer`'s `plainToInstance` constructs the DTO and assigns each field one at a time *before* your handler — and TS Typed's own per-field guard, which protects every class field unconditionally, throws on the very first bad field during that construction. By the time a value would reach the parameter boundary `AggregateErrors()` governs, either the first bad field has already thrown (as an ordinary single-violation `StrictTypeError`, handled the same way as any other field violation above), or every field was already individually valid and there is nothing left to aggregate. See [Limitations](./limitations.md) for the full statement of this boundary.
 
 ## `StrictTypeHttpError`: build your own filter
 
@@ -181,8 +199,41 @@ The following examples show what the client receives in each case. In none of th
 }
 ```
 
-## Known limitation: one violation per request
+**A `@AggregateErrors()` DTO, validated structurally (no `ValidationPipe`, or `transform: false`), with two bad fields:**
 
-TS Typed does not aggregate violations into a single response. It validates field by field and throws on the **first** invalid field. This differs from `class-validator`, which collects every violation and reports them together.
+```json
+{
+  "statusCode": 400,
+  "message": "Validation failed: 2 error(s)",
+  "code": "TYPE_MISMATCH",
+  "propertyPath": "CreateUserDto.name",
+  "expected": "string",
+  "received": "number",
+  "contractKind": "parameter",
+  "operation": "argument",
+  "errors": [
+    {
+      "code": "TYPE_MISMATCH",
+      "propertyPath": "CreateUserDto.name",
+      "expected": "string",
+      "received": "number",
+      "contractKind": "parameter",
+      "operation": "argument"
+    },
+    {
+      "code": "TYPE_MISMATCH",
+      "propertyPath": "CreateUserDto.age",
+      "expected": "number",
+      "received": "string",
+      "contractKind": "parameter",
+      "operation": "argument"
+    }
+  ]
+}
+```
 
-If your API contract requires every field's errors in one response, keep `class-validator` for that specific need. `@TypeErrorResponse()` and `@ServerPopulated()` solve two problems: customizing the message and status of a field, and telling Entities apart from DTOs. They do not aggregate errors.
+The top-level fields (`code`, `propertyPath`, `expected`, `received`, …) mirror the first violation, for any code that only knows about plain `StrictTypeError` fields. `errors` carries every violation found, in traversal order.
+
+## One violation per request, unless you opt into `AggregateErrors()`
+
+By default, TS Typed does not aggregate violations into a single response — it validates field by field and throws on the **first** invalid field, as the single-violation examples above show. [`AggregateErrors()`](#aggregateerrors-collecting-every-violation-in-one-response) opts a class into the aggregate model instead, scoped to the parameter boundary, with the `ValidationPipe({ transform: true })` caveat described above. `@TypeErrorResponse()` and `@ServerPopulated()` solve two different problems — customizing the message and status of a field, and telling Entities apart from DTOs — and remain single-violation mechanisms regardless of `AggregateErrors()`.

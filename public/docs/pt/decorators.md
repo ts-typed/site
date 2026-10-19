@@ -9,6 +9,7 @@ import {
   StructuralClass,
   ServerPopulated,
   TypeErrorResponse,
+  AggregateErrors,
 } from '@ts-typed/compiler';
 ```
 
@@ -87,4 +88,37 @@ Quando um `StrictTypeError` é lançado para esse campo, ele carrega `typeErrorR
 
 Por si só, este pacote não tem nenhuma noção de HTTP. Quem transforma esses campos em uma resposta HTTP de fato são o `StrictTypeErrorFilter` e o `StrictTypeHttpError` do `@ts-typed/nestjs`. Pense no `TypeErrorResponse` como uma alternativa, por propriedade, às mensagens que você escreveria com class-validator.
 
-**Importante:** o `TypeErrorResponse` continua sendo um mecanismo de falha rápida (fail-fast). Ele personaliza a resposta para a **única** violação que disparar naquela propriedade. Não é um agregado de todas as violações do objeto. Se você precisar reportar todas as violações em uma única resposta, veja [Limitações](./limitations.md).
+**Importante:** o `TypeErrorResponse` continua sendo um mecanismo de falha rápida (fail-fast). Ele personaliza a resposta para a **única** violação que disparar naquela propriedade. Não é um agregado de todas as violações do objeto. Para isso, veja o `AggregateErrors()` abaixo.
+
+### `AggregateErrors()`
+
+`AggregateErrors()` é um decorador de classe. Ele faz a classe coletar **todas** as violações encontradas nela, em qualquer profundidade, em um único `AggregateStrictTypeError`, em vez do comportamento padrão fail-fast do TS Typed (só a primeira violação).
+
+```ts
+import { AggregateErrors, AggregateStrictTypeError } from '@ts-typed/compiler';
+
+@AggregateErrors()
+class CreateUserDto {
+  public name: string = '';
+  public age: number = 0;
+}
+
+function createUser(dto: CreateUserDto): void { /* ... */ }
+
+try {
+  createUser({ name: 42, age: 'velha' } as any);
+} catch (error) {
+  if (error instanceof AggregateStrictTypeError) {
+    console.log(error.errors); // todas as violações, não só a primeira
+  }
+}
+```
+
+Isso tem escopo estreito, de propósito:
+
+- **Só muda o comportamento na fronteira de parâmetro** — um argumento de função ou método, o formato que um corpo de requisição tem ao chegar num handler. Construção, escrita em campo depois da construção, variável e valor de retorno continuam fail-fast independente deste decorator. Não existe um "formulário inteiro" pra agregar numa escrita de campo único.
+- **Percorre objetos e arrays aninhados em profundidade total**, incluindo um valor aninhado opcional ou anulável (`profile?: Profile`, `profile: Profile | null`) — desde que exatamente um ramo não-nulo do tipo daquele campo seja em formato de objeto ou array. Um campo cujo tipo tenha dois ou mais ramos em formato de objeto genuinamente ambíguos reporta uma violação genérica para aquele campo em vez disso.
+- **A detecção é estática.** O compilador lê o decorator diretamente da declaração da classe, então funciona independente de qual arquivo declara a classe — o caso normal, já que um DTO quase sempre é importado do seu próprio arquivo.
+- `AggregateStrictTypeError extends StrictTypeError`, então toda checagem `instanceof StrictTypeError` já existente — seu próprio `try`/`catch`, o `StrictTypeErrorFilter` do `@ts-typed/nestjs` — continua funcionando sem mudanças. Ela vê os campos da primeira violação através das propriedades herdadas, com a lista completa adicionalmente disponível em `.errors`.
+
+**Antes de usar isso:** se o seu parâmetro é populado pelo `plainToInstance` do `class-transformer` — o padrão por trás do `ValidationPipe({ transform: true })` do Nest —, este decorator não vai disparar do jeito que você espera. O `plainToInstance` constrói a classe e atribui cada campo um de cada vez, e o TS Typed protege cada campo de classe individualmente e incondicionalmente, independente deste decorator. O **primeiro** campo inválido lança o erro imediatamente, durante a construção, antes de o objeto nunca estar inteiro — então, quando um valor chegaria na fronteira de parâmetro que este decorator rege, ou o primeiro campo inválido já lançou o erro, ou todos os campos já eram individualmente válidos e não sobra nada pra agregar. O `AggregateErrors()` só tem efeito quando o TS Typed está validando estruturalmente, na fronteira, um objeto simples ainda não instanciado — veja [Core Concepts: Comportamento fail-fast](./core-concepts.md#comportamento-fail-fast) e [Limitações](./limitations.md).

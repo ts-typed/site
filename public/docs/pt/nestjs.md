@@ -98,7 +98,25 @@ export class CreateUserDto {
 
 O decorator é acionado para **qualquer** tipo de violação naquele campo, incluindo tipo incorreto, propriedade extra ou escrita em um campo readonly. Ele substitui apenas a `message` (e o `statusCode`, se você informar um). Todos os demais campos de diagnóstico continuam chegando ao cliente, incluindo `code`, `propertyPath`, `expected`, `received`, `contractKind` e `operation`. O cliente recebe a sua mensagem personalizada e o detalhe completo do que estava errado.
 
-Assim como o restante do TS Typed, este é um mecanismo de violação única.
+Assim como o restante do TS Typed, este é um mecanismo de violação única — combine com o `AggregateErrors()` abaixo se você também precisar de todas as violações em uma única resposta.
+
+## `AggregateErrors()`: coletando todas as violações em uma resposta
+
+Decore um DTO com `AggregateErrors()` (de `@ts-typed/compiler`) para coletar todas as violações encontradas nele — em qualquer profundidade, incluindo objetos aninhados e um DTO aninhado opcional/anulável — em um único `AggregateStrictTypeError`, em vez do comportamento padrão fail-fast do TS Typed:
+
+```ts
+import { AggregateErrors } from '@ts-typed/compiler';
+
+@AggregateErrors()
+export class CreateUserDto {
+  public name: string = '';
+  public age: number = 0;
+}
+```
+
+Não é preciso nenhuma mudança no `StrictTypeErrorFilter` nem no `StrictTypeHttpError`: `AggregateStrictTypeError extends StrictTypeError`, então o `@Catch(StrictTypeError)` já existente do filtro já o captura, e seu array `errors` — todas as violações coletadas — já é incluído no corpo da resposta através do mesmo espalhamento de `toJSON()` que o filtro sempre fez.
+
+**Isso só tem efeito quando o TS Typed está validando o valor recebido estruturalmente, como um objeto simples, na fronteira de parâmetro** — o formato que um corpo de requisição tem por padrão sem nenhum `ValidationPipe`, ou com um configurado com `transform: false`. Se o seu app usa o `ValidationPipe({ transform: true })`, o próprio recomendado pelo Nest, o `plainToInstance` do `class-transformer` constrói o DTO e atribui cada campo um de cada vez *antes* do seu handler — e o próprio guard de campo do TS Typed, que protege cada campo de classe incondicionalmente, lança erro no primeiro campo inválido durante essa construção. Quando um valor chegaria na fronteira de parâmetro que o `AggregateErrors()` rege, ou o primeiro campo inválido já lançou o erro (como um `StrictTypeError` comum de violação única, tratado do mesmo jeito que qualquer outra violação de campo acima), ou todos os campos já eram individualmente válidos e não sobra nada pra agregar. Veja [Limitações](./limitations.md) para a declaração completa dessa fronteira.
 
 ## `StrictTypeHttpError`: crie o seu próprio filtro
 
@@ -181,8 +199,41 @@ Os exemplos a seguir mostram o que o cliente recebe em cada caso. Em nenhum dele
 }
 ```
 
-## Limitação conhecida: uma violação por requisição
+**Um DTO com `@AggregateErrors()`, validado estruturalmente (sem `ValidationPipe`, ou com `transform: false`), com dois campos inválidos:**
 
-O TS Typed não agrega violações em uma única resposta. Ele valida campo a campo e lança exceção no **primeiro** campo inválido. Isso difere do `class-validator`, que coleta todas as violações e as reporta juntas.
+```json
+{
+  "statusCode": 400,
+  "message": "Validation failed: 2 error(s)",
+  "code": "TYPE_MISMATCH",
+  "propertyPath": "CreateUserDto.name",
+  "expected": "string",
+  "received": "number",
+  "contractKind": "parameter",
+  "operation": "argument",
+  "errors": [
+    {
+      "code": "TYPE_MISMATCH",
+      "propertyPath": "CreateUserDto.name",
+      "expected": "string",
+      "received": "number",
+      "contractKind": "parameter",
+      "operation": "argument"
+    },
+    {
+      "code": "TYPE_MISMATCH",
+      "propertyPath": "CreateUserDto.age",
+      "expected": "number",
+      "received": "string",
+      "contractKind": "parameter",
+      "operation": "argument"
+    }
+  ]
+}
+```
 
-Se o contrato da sua API exige os erros de todos os campos em uma só resposta, mantenha o `class-validator` para essa necessidade específica. O `@TypeErrorResponse()` e o `@ServerPopulated()` resolvem dois problemas: personalizar a mensagem e o status de um campo, e diferenciar Entities de DTOs. Eles não agregam erros.
+Os campos de nível superior (`code`, `propertyPath`, `expected`, `received`, …) espelham a primeira violação, para qualquer código que só conheça os campos comuns de um `StrictTypeError`. O `errors` carrega todas as violações encontradas, na ordem em que foram percorridas.
+
+## Uma violação por requisição, a menos que você opte pelo `AggregateErrors()`
+
+Por padrão, o TS Typed não agrega violações em uma única resposta — ele valida campo a campo e lança exceção no **primeiro** campo inválido, como mostram os exemplos de violação única acima. O [`AggregateErrors()`](#aggregateerrors-coletando-todas-as-violações-em-uma-resposta) faz uma classe optar pelo modelo agregado em vez disso, restrito à fronteira de parâmetro, com a ressalva do `ValidationPipe({ transform: true })` descrita acima. O `@TypeErrorResponse()` e o `@ServerPopulated()` resolvem dois problemas diferentes — personalizar a mensagem e o status de um campo, e diferenciar Entities de DTOs — e continuam sendo mecanismos de violação única independente do `AggregateErrors()`.

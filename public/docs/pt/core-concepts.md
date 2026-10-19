@@ -116,4 +116,6 @@ createUser({ name: 42, age: 'trinta', email: 'ana@example.com' });
 
 A verificação reporta a primeira divergência que encontra, por exemplo `name`, e lança o erro. Ela não reporta também `age`. Depois que você corrige `name`, a próxima requisição pode revelar `age`.
 
-Isso mantém o caminho de falha simples e barato. O erro descreve um problema concreto, e o código que o trata nunca precisa interpretar uma lista de problemas. Se você precisar informar a um cliente todos os problemas de uma vez, valide a entrada em uma camada dedicada antes de ela chegar ao typed boundary.
+Isso mantém o caminho de falha simples e barato. O erro descreve um problema concreto, e o código que o trata nunca precisa interpretar uma lista de problemas.
+
+Se você precisar de todas as violações reportadas juntas — no modelo do class-validator —, decore a classe com `AggregateErrors()` e o TS Typed vai coletar todas as violações encontradas em um valor que cruza uma fronteira de parâmetro, em vez de parar na primeira. É opt-in e tem escopo estreito; veja [`AggregateErrors()`](./decorators.md#aggregateerrors) pra entender exatamente onde ele se aplica e onde não.
