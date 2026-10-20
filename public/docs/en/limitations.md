@@ -41,16 +41,18 @@ The microbenchmarks separate two operations:
 - `assertValue` validates a value and reports violations; it does not create a protected response object.
 - `protectValue` projects and protects the response value. The projection step is included in the `project+protectValue` result below.
 
+These measurements include compiler 0.1.28's per-traversal `WeakMap` cache for object-schema keys. The cache is discarded at the end of the validation/protection walk; it does not weaken mutation protection or retain schemas across requests.
+
 | Operation | Median |
 | --- | ---: |
-| Primitive validation | 29.0 ns |
-| `UserResponse` object | 536 ns |
-| `UserResponse[100]` | 58.9 µs |
-| `assertValue(UserResponse[10k])` | 6.20 ms |
-| `assertValue(UserEntity[10k])` | 7.58 ms |
-| `project+protectValue(UserResponse[10k])` | 47.1 ms |
+| Primitive validation | 42.6 ns |
+| `UserResponse` object | 567 ns |
+| `UserResponse[100]` | 42.7 µs |
+| `assertValue(UserResponse[10k])` | 4.89 ms |
+| `assertValue(UserEntity[10k])` | 5.93 ms |
+| `project+protectValue(UserResponse[10k])` | 43.44 ms |
 
-For HTTP throughput, the unprotected baseline was 77.06 req/s with Express and 76.28 req/s with Nest. The protected path measured 14.59 req/s with Express and 14.41 req/s with Nest.
+For HTTP throughput, the unprotected baseline was 78.87 req/s with Express and 77.73 req/s with Nest. The protected path measured 15.79 req/s with Express and 15.85 req/s with Nest.
 
 These numbers intentionally stress-test a bad production response shape: returning 10,000 users in one response. In production, prefer pagination (and bounded page sizes) before optimizing this path. Treat the figures as a way to compare shapes and protection strategies locally, not as a promise about another runtime, database, network, or deployment.
 

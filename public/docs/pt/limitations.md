@@ -41,16 +41,18 @@ Os microbenchmarks distinguem duas operações:
 - `assertValue` valida um valor e relata violações; não cria um objeto de resposta protegido.
 - `protectValue` projeta e protege o valor de resposta. A etapa de projeção está incluída no resultado `project+protectValue` abaixo.
 
+Estas medições incluem o cache por travessia de chaves de schema em `WeakMap` do compiler 0.1.28. O cache é descartado ao final da validação/proteção; ele não enfraquece a proteção contra mutações nem retém schemas entre requisições.
+
 | Operação | Mediana |
 | --- | ---: |
-| Validação de primitivo | 29,0 ns |
-| Objeto `UserResponse` | 536 ns |
-| `UserResponse[100]` | 58,9 µs |
-| `assertValue(UserResponse[10k])` | 6,20 ms |
-| `assertValue(UserEntity[10k])` | 7,58 ms |
-| `project+protectValue(UserResponse[10k])` | 47,1 ms |
+| Validação de primitivo | 42,6 ns |
+| Objeto `UserResponse` | 567 ns |
+| `UserResponse[100]` | 42,7 µs |
+| `assertValue(UserResponse[10k])` | 4,89 ms |
+| `assertValue(UserEntity[10k])` | 5,93 ms |
+| `project+protectValue(UserResponse[10k])` | 43,44 ms |
 
-Em throughput HTTP, a linha de base sem proteção foi de 77,06 req/s com Express e 76,28 req/s com Nest. O caminho protegido mediu 14,59 req/s com Express e 14,41 req/s com Nest.
+Em throughput HTTP, a linha de base sem proteção foi de 78,87 req/s com Express e 77,73 req/s com Nest. O caminho protegido mediu 15,79 req/s com Express e 15,85 req/s com Nest.
 
 Esses números testam intencionalmente sob estresse um formato de resposta ruim em produção: retornar 10.000 usuários em uma única resposta. Em produção, prefira paginação (com tamanhos de página limitados) antes de otimizar esse caminho. Use os valores para comparar formatos e estratégias de proteção localmente, não como promessa para outro runtime, banco, rede ou implantação.
 
