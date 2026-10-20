@@ -7,8 +7,27 @@ Ele também oferece um mecanismo por campo para mensagens e status personalizado
 ## Instalação
 
 ```bash
-npm install @ts-typed/nestjs
+npm install --save-dev @ts-typed/compiler @ts-typed/nestjs
+npx ts-typed init
 ```
+
+## Scripts nativos do Nest
+
+Depois do `init`, um projeto Nest convencional continua usando os comandos npm habituais. O TS Typed substitui somente o comando de compilação padrão nestes scripts:
+
+```json
+{
+  "build": "ts-typed nest build",
+  "start": "ts-typed nest start",
+  "start:dev": "ts-typed nest start --watch",
+  "start:debug": "ts-typed nest start --debug --watch",
+  "start:prod": "node dist/main"
+}
+```
+
+`npm run build` emite JavaScript protegido, sem bundle, no diretório `dist` normal do Nest. `npm start` recompila e inicia `dist/main.js`; `start:dev` recompila após mudanças no código e só reinicia depois de um build bem-sucedido. Reexecutar o `init` é seguro e scripts personalizados permanecem intactos.
+
+Esta integração requer o builder TypeScript `tsc` do Nest. SWC, Rspack e webpack não conseguem executar o transformer TypeScript do TS Typed; por isso o comando para com um erro acionável em vez de emitir uma aplicação sem proteção de runtime. Quando necessário, configure `"compilerOptions": { "builder": "tsc" }` no `nest-cli.json`.
 
 ## Configurando o filtro
 
