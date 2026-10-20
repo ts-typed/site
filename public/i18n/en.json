@@ -31,7 +31,9 @@
       "generics": "Generics",
       "nestjs": "NestJS Integration",
       "validators": "Validators",
-      "limitations": "Known Limitations"
+      "limitations": "Known Limitations",
+      "performance": "Performance & Benchmarks",
+      "version": "Documentation version"
     }
   }
 }

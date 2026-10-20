@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { MarkdownModule } from 'ngx-markdown';
 import { TranslateService } from '@ngx-translate/core';
+import { getDocumentationVersion } from '../../docs-versions';
 
 @Component({
   selector: 'app-doc-page',
@@ -24,7 +25,9 @@ export class DocPageComponent {
     this.route.paramMap.subscribe((params: ParamMap) => {
       const slug = params.get('slug') ?? 'introduction';
       const lang = this.translate.getCurrentLang() || 'en';
-      this.src.set(`/docs/${lang}/${slug}.md`);
+      const version = getDocumentationVersion(params.get('version'));
+      const versionPrefix = version.directory === undefined ? '' : `/${version.directory}`;
+      this.src.set(`/docs${versionPrefix}/${lang}/${slug}.md`);
       if (isPlatformBrowser(this.platformId)) {
         window.scrollTo(0, 0);
       }
