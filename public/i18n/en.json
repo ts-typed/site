@@ -6,7 +6,7 @@
       "title": "Your types were always the contract. Now they're enforced.",
       "subtitle": "TS Typed instruments the TypeScript you already wrote to validate your data at runtime — no duplicate schema, no decorator-per-field, no drift between what your types say and what your code actually checks.",
       "proof": "Built for data boundaries",
-      "runtimeGuard": "runtime contract validated"
+      "runtimeGuard": "the type is enforced at runtime too"
     },
     "cta": { "start": "Get Started", "readDocs": "Read the docs", "eyebrow": "Build with confidence", "title": "Your TypeScript can do more.", "body": "Start with a plain TypeScript, Express, or NestJS project and keep safety explicit at every boundary.", "performance": "View benchmarks" },
     "features": {
@@ -25,7 +25,7 @@
       "eyebrow": "Start in minutes",
       "title": "See it in action",
       "body": "No decorators scattered across your model. The compiler finds boundaries and keeps the contract visible in code.",
-      "code": "class CreateUserDto {\n  public readonly cpf!: CPF;\n  public readonly email!: Email;\n}\n\n// client sends raw strings — TS Typed validates and\n// auto-constructs both fields, no decorators needed."
+      "code": "interface CreateUserDto {\n  email: Email;\n  name: string;\n}\n\nfunction createUser(dto: CreateUserDto) {\n  return users.create(dto);\n}\n\n// the type written in TS is enforced at runtime too."
     },
     "metrics": { "stars": "GitHub stars", "downloads": "Monthly npm downloads", "schemas": "Duplicate schemas", "types": "Type-based contract" }
   },

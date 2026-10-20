@@ -13,14 +13,16 @@
     </div>
     <div class="hero-code-card" aria-label="TypeScript example">
       <div class="code-card-top"><span class="code-dots"><i></i><i></i><i></i></span><span>create-user.dto.ts</span><span class="code-badge">typed</span></div>
-      <pre><code><span class="code-keyword">interface</span> <span class="code-type">UserResponse</span> {{ '{' }}
-  id: <span class="code-type">number</span>;
+      <pre><code><span class="code-keyword">interface</span> <span class="code-type">CreateUserDto</span> {{ '{' }}
   email: <span class="code-type">Email</span>;
   name: <span class="code-type">string</span>;
 {{ '}' }}
 
-<span class="code-comment">// one type, enforced at runtime</span>
-<span class="code-keyword">return</span> <span class="code-function">validate</span>(payload);</code></pre>
+<span class="code-keyword">function</span> <span class="code-function">createUser</span>(dto: <span class="code-type">CreateUserDto</span>) {{ '{' }}
+  <span class="code-keyword">return</span> users.create(dto);
+{{ '}' }}
+
+<span class="code-comment">// the compiler enforces this type at runtime</span></code></pre>
       <div class="code-card-foot"><span class="success-mark">✓</span> {{ 'landing.hero.runtimeGuard' | translate }}</div>
     </div>
   </section>

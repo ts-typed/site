@@ -6,7 +6,7 @@
       "title": "Seus tipos sempre foram o contrato. Agora eles são aplicados.",
       "subtitle": "O TS Typed instrumenta o TypeScript que você já escreveu para validar seus dados em tempo de execução — sem schema duplicado, sem decorator por campo, sem divergência entre o que seu tipo diz e o que seu código realmente verifica.",
       "proof": "Feito para fronteiras de dados",
-      "runtimeGuard": "contrato validado em runtime"
+      "runtimeGuard": "o tipo também é garantido em runtime"
     },
     "cta": { "start": "Comece agora", "readDocs": "Ler a documentação", "eyebrow": "Construa com confiança", "title": "Seu TypeScript pode fazer mais.", "body": "Comece com um projeto TypeScript puro, Express ou NestJS e mantenha segurança explícita em cada fronteira.", "performance": "Ver os benchmarks" },
     "features": {
@@ -25,7 +25,7 @@
       "eyebrow": "Comece em minutos",
       "title": "Veja funcionando",
       "body": "Sem decorators espalhados pelo modelo. O compiler encontra as fronteiras e mantém o contrato visível no código.",
-      "code": "class CreateUserDto {\n  public readonly cpf!: CPF;\n  public readonly email!: Email;\n}\n\n// o cliente envia strings cruas — o TS Typed valida e\n// auto-constrói os dois campos, sem decorators."
+      "code": "interface CreateUserDto {\n  email: Email;\n  name: string;\n}\n\nfunction createUser(dto: CreateUserDto) {\n  return users.create(dto);\n}\n\n// o tipo escrito em TS também é garantido em runtime."
     },
     "metrics": { "stars": "Estrelas no GitHub", "downloads": "Downloads mensais no npm", "schemas": "Schemas duplicados", "types": "Contrato baseado em tipos" }
   },
