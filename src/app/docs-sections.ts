@@ -15,4 +15,5 @@ export const DOC_SECTIONS: readonly DocSection[] = [
   { slug: 'validators', titleKey: 'docs.nav.validators' },
   { slug: 'limitations', titleKey: 'docs.nav.limitations' },
   { slug: 'performance', titleKey: 'docs.nav.performance' },
+  { slug: 'optimizations', titleKey: 'docs.nav.optimizations' },
 ];

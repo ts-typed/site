@@ -33,6 +33,7 @@
       "validators": "Validators",
       "limitations": "Known Limitations",
       "performance": "Performance & Benchmarks",
+      "optimizations": "Optimizations",
       "version": "Documentation version",
       "menu": "Documentation menu"
     }

@@ -15,9 +15,9 @@ TS Typed is intentionally scoped. The limitations below are **deliberate scope b
 
 ## Generics
 
-- **Generic classes and methods with no call-expression form are not covered.** A generic value used only as a type annotation, never actually called or constructed, gives the compiler no call site to resolve an instantiated signature from.
+- **Unused generic classes and methods are not covered.** Generic calls and constructions, including inferred arguments, are resolved at their call site. But a generic type used only as an annotation, without a concrete call or construction, provides no instantiated signature to transport to runtime.
 - **A method whose generic declaration lives in one of TypeScript's own bundled libraries is excluded.** `Array.prototype.map`, `Promise.resolve`, `Map`/`Set`'s own methods, `new Map(...)`/`new Set(...)` themselves, and so on, are deliberately out of scope — see [Generics](./generics.md#whats-still-not-covered) for why.
-- **Generators are not covered.** Calling a generator function produces an iterator rather than a single return value, and the yielded values are not validated.
+- **`yield*` delegation is not validated by the outer function.** `yield` and the return value of generators/async generators are validated; delegation is preserved without rewriting. The delegated generator remains protected when it has its own typed boundary.
 
 ## Module output
 
@@ -32,30 +32,6 @@ TS Typed is intentionally scoped. The limitations below are **deliberate scope b
 - **A union that includes a `ValueObject` type does not auto-construct.** For example, `CPF | undefined` does not auto-construct.
 - **A class reached through a symlinked or workspace `node_modules` install is not detected.**
 
-## Performance reference
-
-The following figures are local reference measurements, not a remote-database benchmark or a production capacity promise. They were collected on Node 22.22.3 with TypeORM and `better-sqlite3` in memory, using 10,000 `UserEntity` instances. The response shape removes `passwordHash`. The HTTP results use five samples of 20 requests each, with concurrency 4.
-
-The microbenchmarks separate two operations:
-
-- `assertValue` validates a value and reports violations; it does not create a protected response object.
-- `protectValue` projects and protects the response value. The projection step is included in the `project+protectValue` result below.
-
-These measurements include compiler 0.1.28's per-traversal `WeakMap` cache for object-schema keys. The cache is discarded at the end of the validation/protection walk; it does not weaken mutation protection or retain schemas across requests.
-
-| Operation | Median |
-| --- | ---: |
-| Primitive validation | 42.6 ns |
-| `UserResponse` object | 567 ns |
-| `UserResponse[100]` | 42.7 µs |
-| `assertValue(UserResponse[10k])` | 4.89 ms |
-| `assertValue(UserEntity[10k])` | 5.93 ms |
-| `project+protectValue(UserResponse[10k])` | 43.44 ms |
-
-For HTTP throughput, the unprotected baseline was 78.87 req/s with Express and 77.73 req/s with Nest. The protected path measured 15.79 req/s with Express and 15.85 req/s with Nest.
-
-These numbers intentionally stress-test a bad production response shape: returning 10,000 users in one response. In production, prefer pagination (and bounded page sizes) before optimizing this path. Treat the figures as a way to compare shapes and protection strategies locally, not as a promise about another runtime, database, network, or deployment.
-
 ---
 
-If one of these limitations blocks your use case, the right next step is usually to adjust the boundary: make the type explicit, import the class by name, or keep a validation step of your own where TS Typed does not reach. For the mechanisms that do cover these areas, see [Decorators](./decorators.md) and [Generics](./generics.md).
+If one of these limitations blocks your use case, the right next step is usually to adjust the boundary: make the type explicit, import the class by name, or keep a validation step of your own where TS Typed does not reach. For mechanisms that cover these areas, see [Decorators](./decorators.md), [Generics](./generics.md), [Performance](./performance.md), and [Optimizations](./optimizations.md).

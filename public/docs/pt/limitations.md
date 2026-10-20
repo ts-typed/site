@@ -15,9 +15,9 @@ O TS Typed tem um escopo intencionalmente delimitado. As limitações abaixo sã
 
 ## Genéricos
 
-- **Classes e métodos genéricos sem forma de expressão de chamada não são cobertos.** Um valor genérico usado apenas como anotação de tipo, nunca de fato chamado ou construído, não dá ao compilador nenhum ponto de chamada do qual resolver uma assinatura instanciada.
+- **Classes e métodos genéricos sem uso não são cobertos.** Chamadas e construções genéricas, inclusive com argumentos inferidos, são resolvidas no ponto de chamada. Mas um tipo genérico usado apenas como anotação, sem uma chamada ou construção concreta, não oferece ao compilador uma assinatura instanciada para transportar ao runtime.
 - **Um método cuja declaração genérica vive em uma das bibliotecas embutidas do próprio TypeScript é excluído.** `Array.prototype.map`, `Promise.resolve`, os métodos do próprio `Map`/`Set`, o `new Map(...)`/`new Set(...)` em si, e assim por diante, estão deliberadamente fora do escopo — veja [Genéricos](./generics.md#o-que-ainda-não-é-coberto) para entender o motivo.
-- **Geradores não são cobertos.** Chamar uma função geradora produz um iterador, e não um único valor de retorno, e os valores emitidos com `yield` não são validados.
+- **A delegação `yield*` não é validada pela função externa.** `yield` e o valor de retorno de generators/async generators são validados; a delegação é preservada sem reescrita. O generator delegado continua protegido se ele próprio tiver uma fronteira tipada.
 
 ## Saída de módulos
 
@@ -32,30 +32,6 @@ O TS Typed tem um escopo intencionalmente delimitado. As limitações abaixo sã
 - **Uma união que inclui um tipo `ValueObject` não é construída automaticamente.** Por exemplo, `CPF | undefined` não é construído automaticamente.
 - **Uma classe alcançada por uma instalação em `node_modules` via symlink ou workspace não é detectada.**
 
-## Referência de desempenho
-
-Os números a seguir são medições locais de referência, não um benchmark com banco remoto nem uma promessa de capacidade em produção. Foram coletados no Node 22.22.3, usando TypeORM e `better-sqlite3` em memória, com 10.000 instâncias de `UserEntity`. O formato da resposta remove `passwordHash`. Os resultados HTTP usam cinco amostras de 20 requisições cada, com concorrência 4.
-
-Os microbenchmarks distinguem duas operações:
-
-- `assertValue` valida um valor e relata violações; não cria um objeto de resposta protegido.
-- `protectValue` projeta e protege o valor de resposta. A etapa de projeção está incluída no resultado `project+protectValue` abaixo.
-
-Estas medições incluem o cache por travessia de chaves de schema em `WeakMap` do compiler 0.1.28. O cache é descartado ao final da validação/proteção; ele não enfraquece a proteção contra mutações nem retém schemas entre requisições.
-
-| Operação | Mediana |
-| --- | ---: |
-| Validação de primitivo | 42,6 ns |
-| Objeto `UserResponse` | 567 ns |
-| `UserResponse[100]` | 42,7 µs |
-| `assertValue(UserResponse[10k])` | 4,89 ms |
-| `assertValue(UserEntity[10k])` | 5,93 ms |
-| `project+protectValue(UserResponse[10k])` | 43,44 ms |
-
-Em throughput HTTP, a linha de base sem proteção foi de 78,87 req/s com Express e 77,73 req/s com Nest. O caminho protegido mediu 15,79 req/s com Express e 15,85 req/s com Nest.
-
-Esses números testam intencionalmente sob estresse um formato de resposta ruim em produção: retornar 10.000 usuários em uma única resposta. Em produção, prefira paginação (com tamanhos de página limitados) antes de otimizar esse caminho. Use os valores para comparar formatos e estratégias de proteção localmente, não como promessa para outro runtime, banco, rede ou implantação.
-
 ---
 
-Se alguma dessas limitações bloquear o seu caso de uso, o próximo passo geralmente é ajustar a fronteira: tornar o tipo explícito, importar a classe pelo nome ou manter uma etapa de validação própria onde o TS Typed não alcança. Para os mecanismos que cobrem essas áreas, veja [Decoradores](./decorators.md) e [Genéricos](./generics.md).
+Se alguma dessas limitações bloquear o seu caso de uso, o próximo passo geralmente é ajustar a fronteira: tornar o tipo explícito, importar a classe pelo nome ou manter uma etapa de validação própria onde o TS Typed não alcança. Para os mecanismos que cobrem essas áreas, veja [Decoradores](./decorators.md), [Genéricos](./generics.md), [Performance](./performance.md) e [Otimizações](./optimizations.md).
