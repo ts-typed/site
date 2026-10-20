@@ -12,6 +12,12 @@ interface Scenario {
   readonly takeaway: string;
 }
 
+interface ScenarioGroup {
+  readonly title: string;
+  readonly intro: string;
+  readonly scenarios: readonly Scenario[];
+}
+
 interface Copy {
   readonly eyebrow: string;
   readonly title: string;
@@ -21,7 +27,7 @@ interface Copy {
   readonly legendGuard: string;
   readonly chartTitle: string;
   readonly chartIntro: string;
-  readonly scenarios: readonly Scenario[];
+  readonly scenarioGroups: readonly ScenarioGroup[];
   readonly runtimeTitle: string;
   readonly runtimeIntro: string;
   readonly runtime: readonly { label: string; value: string; detail: string }[];
@@ -34,7 +40,8 @@ interface Copy {
 
 const SCENARIOS: readonly Scenario[] = [
   { title: 'Express · 1 usuário', description: 'Request local com um item; a diferença fica dentro do ruído do socket.', baseline: .811, recommended: .650, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'Para respostas pequenas, a validação não é o fator dominante.' },
-  { title: 'Express · 50 usuários', description: 'Entity → .map() sem passwordHash → DTO → JSON.', baseline: .481, recommended: 3.473, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'O custo aparece quando o lote cruza a fronteira protegida.' },
+  { title: 'Express · 50 usuários otimizado', description: 'Entity → .map() sem passwordHash → DTO imutável → JSON.', baseline: 1.193, recommended: 1.395, normalGuard: 2.120, protectedLabel: 'TS Typed · TTOptImmut', unit: 'ms', takeaway: 'Impacto controlado: +17% no cenário focado, mantendo validação e imutabilidade.' },
+  { title: 'Express · 50 usuários', description: 'A bateria ampla usa a proteção normal em um lote de 50 usuários.', baseline: .481, recommended: 3.473, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'Quando o lote é pequeno, ainda funciona, mas o caminho otimizado deve ser preferido.' },
   { title: 'Express · 10.000 usuários', description: 'Cenário extremo com TypeORM, projeção e serialização de uma resposta grande.', baseline: 5.455, recommended: 311.306, normalGuard: 311.306, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'Paginação é mais importante que qualquer micro-otimização nesse volume.' },
   { title: 'Express · 10.000 usuários otimizado', description: 'Mesmo fluxo, usando TTOptImmut para validar e congelar o POJO de saída.', baseline: 5.455, recommended: 198.085, normalGuard: 311.306, protectedLabel: 'TS Typed · TTOptImmut', unit: 'ms', takeaway: 'A estratégia imutável foi 1,57x mais rápida que o caminho typed normal.' },
   { title: 'NestJS · 50 usuários', description: 'Controller Nest com filtro StrictTypeError no caminho protegido.', baseline: 1.030, recommended: 1.380, normalGuard: 2.160, protectedLabel: 'TS Typed · TTOptImmut', unit: 'ms', takeaway: 'Nest e Express ficaram próximos; o adaptador HTTP não é o gargalo.' },
@@ -52,8 +59,12 @@ const PT: Copy = {
   legendRecommended: 'TS Typed · TTOptImmut',
   legendGuard: 'TS Typed · protectValue',
   chartTitle: 'Cenários reais e exagerados',
-  chartIntro: 'Mediana em milissegundos por request ou por execução. Menor é melhor. O caminho recomendado aparece em verde; o guard mutável aparece em violeta quando existe.',
-  scenarios: SCENARIOS,
+  chartIntro: 'Mediana em milissegundos por request ou por execução. Menor é melhor. Começamos pelo que funciona bem, passamos pelo impacto controlado e terminamos nos casos que exigem otimização.',
+  scenarioGroups: [
+    { title: 'Funciona muito bem', intro: 'Respostas pequenas ou DTOs imutáveis têm custo baixo o bastante para uso cotidiano.', scenarios: SCENARIOS.filter((s) => s.title === 'Express · 1 usuário' || s.title === 'Express · 50 usuários otimizado') },
+    { title: 'Impacto controlado com a estratégia certa', intro: 'Em lotes maiores, o custo existe, mas TTOptImmut reduz bastante o caminho de guards mutáveis.', scenarios: SCENARIOS.filter((s) => s.title === 'Express · 10.000 usuários otimizado' || s.title === 'NestJS · 50 usuários' || s.title === 'NestJS · 10.000 usuários') },
+    { title: 'Desfavorável sem otimização', intro: 'A proteção completa fica cara quando cada linha cruza a fronteira individualmente. Use paginação, lotes, streaming ou uma projeção imutável.', scenarios: SCENARIOS.filter((s) => s.title === 'Express · 50 usuários' || s.title === 'Express · 10.000 usuários' || s.title.startsWith('CSV')) },
+  ],
   runtimeTitle: 'Custo isolado do runtime',
   runtimeIntro: 'Sem banco, HTTP ou serialização: apenas a operação de validação/proteção.',
   runtime: [
@@ -86,8 +97,12 @@ const EN: Copy = {
   title: 'Security you can measure',
   intro: 'The battery separates validation, projection, protection, and transport to show where TS Typed costs more — and where the immutable strategy recovers performance without dropping coverage.',
   legendBaseline: 'Without TS Typed', legendRecommended: 'TS Typed · TTOptImmut', legendGuard: 'TS Typed · protectValue',
-  chartTitle: 'Real and intentionally extreme scenarios', chartIntro: 'Median milliseconds per request or execution. Lower is better. The recommended path is green; mutable guards are violet when available.',
-  scenarios: SCENARIOS.map((s) => ({ ...s, title: s.title.replace('usuário', 'user').replace('usuários', 'users').replace('linhas', 'rows').replace('otimizado', 'optimized'), protectedLabel: s.protectedLabel?.replace('TS Typed', 'TS Typed').replace('protectValue', 'protectValue'), description: s.description, takeaway: s.takeaway })),
+  chartTitle: 'Real and intentionally extreme scenarios', chartIntro: 'Median milliseconds per request or execution. Lower is better. We start with favorable cases, then controlled impact, and end with scenarios that require optimization.',
+  scenarioGroups: [
+    { title: 'Works very well', intro: 'Small responses or immutable DTOs are inexpensive enough for everyday use.', scenarios: SCENARIOS.filter((s) => s.title === 'Express · 1 usuário' || s.title === 'Express · 50 usuários otimizado').map((s) => ({ ...s, title: s.title.replace('usuário', 'user').replace('usuários', 'users').replace('otimizado', 'optimized') })) },
+    { title: 'Controlled impact with the right strategy', intro: 'On larger batches, cost exists, but TTOptImmut substantially reduces the mutable-guard path.', scenarios: SCENARIOS.filter((s) => s.title === 'Express · 10.000 usuários otimizado' || s.title === 'NestJS · 50 usuários' || s.title === 'NestJS · 10.000 usuários').map((s) => ({ ...s, title: s.title.replace('usuários', 'users').replace('otimizado', 'optimized') })) },
+    { title: 'Unfavorable without optimization', intro: 'Full protection is expensive when every row crosses the boundary individually. Use pagination, batches, streaming, or immutable projection.', scenarios: SCENARIOS.filter((s) => s.title === 'Express · 50 usuários' || s.title === 'Express · 10.000 usuários' || s.title.startsWith('CSV')).map((s) => ({ ...s, title: s.title.replace('usuários', 'users').replace('linhas', 'rows') })) },
+  ],
   runtimeTitle: 'Isolated runtime cost', runtimeIntro: 'No database, HTTP, or serialization: only validation/protection work.',
   runtime: [
     { label: 'assertValue(string)', value: '42.6 ns', detail: 'Primitive validation.' }, { label: 'UserResponse', value: '567 ns', detail: 'One output DTO.' }, { label: 'UserResponse[10,000]', value: '4.99 ms', detail: 'Array validation.' }, { label: '10,000 · guards / TTOptImmut', value: '44.83 / 10.58 ms', detail: 'Projection + protection; 4.2x difference.' },
@@ -108,7 +123,7 @@ const EN: Copy = {
     @let copy = content;
     <article class="performance-page">
       <header class="performance-hero"><p class="eyebrow">{{ copy.eyebrow }}</p><h1>{{ copy.title }}</h1><p>{{ copy.intro }}</p><div class="performance-kpis"><div><strong>4,2x</strong><span>TTOptImmut vs guards</span></div><div><strong>57x</strong><span>Express · 10.000</span></div><div><strong>42,6 ns</strong><span>string validation</span></div></div></header>
-      <section class="benchmark-section"><div class="benchmark-heading"><div><p class="eyebrow">01 / {{ copy.chartTitle }}</p><h2>{{ copy.chartTitle }}</h2></div><p>{{ copy.chartIntro }}</p></div><div class="chart-legend"><span><i class="legend-dot baseline"></i>{{ copy.legendBaseline }}</span><span><i class="legend-dot recommended"></i>{{ copy.legendRecommended }}</span><span><i class="legend-dot guard"></i>{{ copy.legendGuard }}</span></div><div class="scenario-grid">@for (scenario of copy.scenarios; track scenario.title) {<section class="scenario-card"><div class="scenario-card-header"><div><h3>{{ scenario.title }}</h3><p>{{ scenario.description }}</p></div><span class="scenario-unit">{{ scenario.unit }}</span></div><div class="scenario-bars"><div class="bar-row"><span>{{ copy.legendBaseline }}</span><div class="bar-track"><div class="bar-fill baseline" [style.width.%]="barWidth(scenario.baseline, scenario)" ></div></div><strong>{{ format(scenario.baseline) }}</strong></div><div class="bar-row"><span>{{ scenario.protectedLabel ?? copy.legendRecommended }}</span><div class="bar-track"><div class="bar-fill recommended" [style.width.%]="barWidth(scenario.recommended, scenario)" ></div></div><strong>{{ format(scenario.recommended) }}</strong></div>@if (scenario.normalGuard) {<div class="bar-row"><span>{{ copy.legendGuard }}</span><div class="bar-track"><div class="bar-fill guard" [style.width.%]="barWidth(scenario.normalGuard, scenario)" ></div></div><strong>{{ format(scenario.normalGuard) }}</strong></div>}</div><p class="scenario-takeaway">{{ scenario.takeaway }}</p></section>}</div></section>
+      <section class="benchmark-section"><div class="benchmark-heading"><div><p class="eyebrow">01 / {{ copy.chartTitle }}</p><h2>{{ copy.chartTitle }}</h2></div><p>{{ copy.chartIntro }}</p></div><div class="chart-legend"><span><i class="legend-dot baseline"></i>{{ copy.legendBaseline }}</span><span><i class="legend-dot recommended"></i>{{ copy.legendRecommended }}</span><span><i class="legend-dot guard"></i>{{ copy.legendGuard }}</span></div>@for (group of copy.scenarioGroups; track group.title; let groupIndex = $index) {<section class="scenario-group" [class.scenario-group-caution]="groupIndex === 2"><div class="scenario-group-heading"><span class="scenario-group-number">0{{ groupIndex + 1 }}</span><div><h3>{{ group.title }}</h3><p>{{ group.intro }}</p></div></div><div class="scenario-grid">@for (scenario of group.scenarios; track scenario.title) {<section class="scenario-card"><div class="scenario-card-header"><div><h3>{{ scenario.title }}</h3><p>{{ scenario.description }}</p></div><span class="scenario-unit">{{ scenario.unit }}</span></div><div class="scenario-bars"><div class="bar-row"><span>{{ copy.legendBaseline }}</span><div class="bar-track"><div class="bar-fill baseline" [style.width.%]="barWidth(scenario.baseline, scenario)" ></div></div><strong>{{ format(scenario.baseline) }}</strong></div><div class="bar-row"><span>{{ scenario.protectedLabel ?? copy.legendRecommended }}</span><div class="bar-track"><div class="bar-fill recommended" [style.width.%]="barWidth(scenario.recommended, scenario)" ></div></div><strong>{{ format(scenario.recommended) }}</strong></div>@if (scenario.normalGuard) {<div class="bar-row"><span>{{ copy.legendGuard }}</span><div class="bar-track"><div class="bar-fill guard" [style.width.%]="barWidth(scenario.normalGuard, scenario)" ></div></div><strong>{{ format(scenario.normalGuard) }}</strong></div>}</div><p class="scenario-takeaway">{{ scenario.takeaway }}</p></section>}</div></section>}</section>
       <section class="benchmark-section"><div class="benchmark-heading"><div><p class="eyebrow">02 / {{ copy.runtimeTitle }}</p><h2>{{ copy.runtimeTitle }}</h2></div><p>{{ copy.runtimeIntro }}</p></div><div class="runtime-grid">@for (item of copy.runtime; track item.label) {<div class="runtime-card"><span>{{ item.label }}</span><strong>{{ item.value }}</strong><small>{{ item.detail }}</small></div>}</div></section>
       <section class="benchmark-section"><div class="benchmark-heading"><div><p class="eyebrow">03 / {{ copy.guidanceTitle }}</p><h2>{{ copy.guidanceTitle }}</h2></div></div><div class="guidance-grid">@for (item of copy.guidance; track item.title) {<article><span class="guidance-mark">✓</span><div><h3>{{ item.title }}</h3><p>{{ item.body }}</p></div></article>}</div></section>
       <details class="method-panel"><summary>{{ copy.methodTitle }}</summary><div><p>{{ copy.methodBody }}</p><ul>@for (item of copy.methodItems; track item) {<li>{{ item }}</li>}</ul></div></details>
