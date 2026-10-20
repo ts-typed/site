@@ -89,6 +89,8 @@ The client sends JSON such as `{ "email": "ana@example.com" }`. When that value 
 
 If the client sends `{ "email": "not-an-email" }`, the construction fails and a `StrictTypeError` is thrown before `create()` runs.
 
+The same conversion applies inside typed objects, arrays, and tuples. For example, a parameter declared as `{ primary: Email; recipients: Email[] }` receives an `Email` instance for `primary` and for every `recipients` item when the request supplies raw strings.
+
 This replaces several pieces you would normally write:
 
 - No `class-validator` decorators on the DTO.
@@ -168,5 +170,4 @@ Auto-construction works for the common cases. A few situations are not detected:
 - A `ValueObject` subclass reached through a namespace import is not detected. Import the class by name instead.
 - A `ValueObject` subclass is not detected when the file resolving the type does not import it by name.
 - A union that includes a `ValueObject` type does not auto-construct. For example, `CPF | undefined` is not converted. Only a direct, non-union reference is constructed.
-- A `ValueObject`-typed property nested inside a plain object or array does not convert when that whole object or array crosses a boundary. The check fails with `TYPE_MISMATCH`. This is safe, because the bad value is rejected, but the value is not auto-constructed. Declare the nested value object as its own typed boundary when you need conversion.
 - A class reached through a symlinked or workspace `node_modules` install is not detected.

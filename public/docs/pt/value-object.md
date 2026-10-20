@@ -89,6 +89,8 @@ O cliente envia um JSON como `{ "email": "ana@example.com" }`. Quando esse valor
 
 Se o cliente enviar `{ "email": "nao-e-um-email" }`, a construção falha e um `StrictTypeError` é lançado antes de `create()` executar.
 
+A mesma conversão vale dentro de objetos, arrays e tuplas tipados. Por exemplo, um parâmetro declarado como `{ primary: Email; recipients: Email[] }` recebe uma instância de `Email` em `primary` e em cada item de `recipients` quando a requisição fornece strings brutas.
+
 Isso substitui várias peças que você normalmente escreveria:
 
 - Nenhum decorator do `class-validator` no DTO.
@@ -168,5 +170,4 @@ A auto-construção funciona nos casos comuns. Algumas situações não são det
 - Uma subclasse de `ValueObject` alcançada por um namespace import não é detectada. Importe a classe pelo nome.
 - Uma subclasse de `ValueObject` não é detectada quando o arquivo que resolve o tipo não a importa pelo nome.
 - Uma união que inclui um tipo `ValueObject` não é auto-construída. Por exemplo, `CPF | undefined` não é convertido. Apenas uma referência direta, sem união, é construída.
-- Uma propriedade do tipo `ValueObject` aninhada dentro de um objeto ou array simples não é convertida quando esse objeto ou array inteiro atravessa um boundary. A verificação falha com `TYPE_MISMATCH`. Isso é seguro, porque o valor incorreto é rejeitado, mas o valor não é auto-construído. Declare o value object aninhado como um typed boundary próprio quando precisar da conversão.
 - Uma classe alcançada por uma instalação em `node_modules` via link simbólico ou workspace não é detectada.
