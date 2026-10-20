@@ -2,11 +2,18 @@
   "nav": { "docs": "Docs" },
   "landing": {
     "hero": {
+      "eyebrow": "Runtime safety for TypeScript",
       "title": "Your types were always the contract. Now they're enforced.",
-      "subtitle": "TS Typed instruments the TypeScript you already wrote to validate your data at runtime — no duplicate schema, no decorator-per-field, no drift between what your types say and what your code actually checks."
+      "subtitle": "TS Typed instruments the TypeScript you already wrote to validate your data at runtime — no duplicate schema, no decorator-per-field, no drift between what your types say and what your code actually checks.",
+      "proof": "Built for data boundaries",
+      "runtimeGuard": "runtime contract validated"
     },
-    "cta": { "start": "Get Started" },
+    "cta": { "start": "Get Started", "readDocs": "Read the docs", "eyebrow": "Build with confidence", "title": "Your TypeScript can do more.", "body": "Start with a plain TypeScript, Express, or NestJS project and keep safety explicit at every boundary.", "performance": "View benchmarks" },
     "features": {
+      "eyebrow": "A safety layer, not another schema",
+      "heading": "The contract that follows your code",
+      "intro": "Validation, value objects, and safe errors connected to the TypeScript your team already maintains.",
+      "learnMore": "Explore",
       "noSchema": { "title": "No schema duplication", "body": "Your existing TypeScript types ARE the runtime contract. Nothing else to keep in sync." },
       "valueObject": { "title": "Auto-constructed value types", "body": "Declare a field as CPF, Email, or your own ValueObject — a raw value crossing that boundary becomes a validated instance automatically." },
       "nestjs": { "title": "NestJS integration", "body": "A ready-made exception filter maps violations to safe HTTP responses, with per-field custom messages and entity/DTO disambiguation." },
@@ -15,10 +22,12 @@
       "opensource": { "title": "Open source", "body": "Apache-2.0, on GitHub, built in the open." }
     },
     "example": {
+      "eyebrow": "Start in minutes",
       "title": "See it in action",
+      "body": "No decorators scattered across your model. The compiler finds boundaries and keeps the contract visible in code.",
       "code": "class CreateUserDto {\n  public readonly cpf!: CPF;\n  public readonly email!: Email;\n}\n\n// client sends raw strings — TS Typed validates and\n// auto-constructs both fields, no decorators needed."
     },
-    "metrics": { "stars": "GitHub stars", "downloads": "Monthly npm downloads" }
+    "metrics": { "stars": "GitHub stars", "downloads": "Monthly npm downloads", "schemas": "Duplicate schemas", "types": "Type-based contract" }
   },
   "docs": {
     "nav": {
@@ -35,7 +44,9 @@
       "performance": "Performance & Benchmarks",
       "optimizations": "Optimizations",
       "version": "Documentation version",
-      "menu": "Documentation menu"
+      "menu": "Documentation menu",
+      "openMenu": "Open documentation menu",
+      "closeMenu": "Close documentation menu"
     }
   }
 }

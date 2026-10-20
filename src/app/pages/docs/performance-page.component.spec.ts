@@ -18,8 +18,9 @@ describe('PerformancePageComponent', () => {
   it('renders comparable protected and unprotected scenarios', (): void => {
     const text = fixture.nativeElement.textContent as string;
 
-    expect(text).toContain('Performance');
-    expect(text).toContain('With TS Typed');
+    expect(text).toContain('Security');
+    expect(text).toContain('TS Typed');
     expect(text).toContain('Without TS Typed');
+    expect(text).toContain('10,000');
   });
 });

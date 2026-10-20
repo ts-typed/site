@@ -4,196 +4,120 @@ import { TranslateService } from '@ngx-translate/core';
 interface Scenario {
   readonly title: string;
   readonly description: string;
-  readonly baseline: string;
-  readonly protected: string;
-  readonly impact: string;
+  readonly baseline: number;
+  readonly recommended: number;
+  readonly normalGuard?: number;
+  readonly protectedLabel?: string;
+  readonly unit: 'ms' | 'req/s';
   readonly takeaway: string;
-  readonly baselineMilliseconds: number;
-  readonly protectedMilliseconds: number;
 }
 
-interface PerformanceCopy {
+interface Copy {
   readonly eyebrow: string;
   readonly title: string;
   readonly intro: string;
-  readonly scenarioTitle: string;
-  readonly scenarioIntro: string;
-  readonly withoutLabel: string;
-  readonly withLabel: string;
+  readonly legendBaseline: string;
+  readonly legendRecommended: string;
+  readonly legendGuard: string;
+  readonly chartTitle: string;
+  readonly chartIntro: string;
   readonly scenarios: readonly Scenario[];
-  readonly costTitle: string;
-  readonly costIntro: string;
-  readonly costs: readonly { readonly label: string; readonly value: string; readonly detail: string }[];
-  readonly recommendationTitle: string;
-  readonly recommendations: readonly { readonly title: string; readonly body: string }[];
+  readonly runtimeTitle: string;
+  readonly runtimeIntro: string;
+  readonly runtime: readonly { label: string; value: string; detail: string }[];
+  readonly guidanceTitle: string;
+  readonly guidance: readonly { title: string; body: string }[];
   readonly methodTitle: string;
   readonly methodBody: string;
   readonly methodItems: readonly string[];
 }
 
 const SCENARIOS: readonly Scenario[] = [
-  {
-    title: 'Express: 10.000 usuários, proteção normal',
-    description: 'O mesmo endpoint remove passwordHash e deixa o DTO mutável com accessors de proteção.',
-    baseline: '5,46 ms',
-    protected: '311,31 ms',
-    impact: '+5.603% de latência',
-    takeaway: 'A proteção completa é a opção correta para valores mutáveis, mas o custo cresce com cada item e campo atravessado.',
-    baselineMilliseconds: 5.455208,
-    protectedMilliseconds: 311.305833,
-  },
-  {
-    title: 'Express: 10.000 usuários, TTOptImmut',
-    description: 'A projeção gera POJOs, valida o grafo uma vez e congela o resultado para uma resposta somente leitura.',
-    baseline: '5,46 ms',
-    protected: '198,08 ms',
-    impact: '+3.531% de latência',
-    takeaway: 'A otimização reduziu o caminho protegido em 1,57x nesta execução. Use-a apenas quando a resposta não precisar ser mutável.',
-    baselineMilliseconds: 5.455208,
-    protectedMilliseconds: 198.084625,
-  },
-  {
-    title: 'Script CSV: 10.000 linhas',
-    description: 'Parse, validação de e-mail, remoção de passwordHash e conversão para o formato público.',
-    baseline: '3,76 ms',
-    protected: '201,50 ms',
-    impact: '+5.260% de latência',
-    takeaway: 'O custo é quase linear: em pipelines grandes, streaming, lotes e menos cópias intermediárias importam mais que microajustes.',
-    baselineMilliseconds: 3.758167,
-    protectedMilliseconds: 201.496417,
-  },
-  {
-    title: 'Express: 50 DTOs de saída',
-    description: 'TypeORM materializa entidades, um .map() remove passwordHash e a resposta é serializada.',
-    baseline: '1,19 ms',
-    protected: '1,40 ms',
-    impact: '+17% de latência',
-    takeaway: 'TTOptImmut mantém a validação e a imutabilidade. O caminho normal com accessors mediu 2,12 ms neste mesmo cenário.',
-    baselineMilliseconds: 1.1927584,
-    protectedMilliseconds: 1.395425,
-  },
-  {
-    title: 'Express: 10.000 DTOs de saída',
-    description: 'Cenário extremo: TypeORM materializa 10.000 UserEntity, .map() remove passwordHash e a resposta é serializada.',
-    baseline: '55,76 ms',
-    protected: '115,01 ms',
-    impact: '+106% de latência',
-    takeaway: 'TTOptImmut evita milhares de accessors. O caminho normal com guards mediu 256,44 ms; a validação continua completa nos dois casos.',
-    baselineMilliseconds: 55.756425,
-    protectedMilliseconds: 115.00995,
-  },
-  {
-    title: 'Nest: 10.000 DTOs + filtro',
-    description: 'O mesmo fluxo roda em um controller Nest, incluindo StrictTypeErrorFilter no caminho protegido.',
-    baseline: '56,28 ms',
-    protected: '117,38 ms',
-    impact: '+109% de latência',
-    takeaway: 'O perfil é próximo ao Express: o volume domina. Com guards mutáveis, a mesma rota mediu 258,50 ms.',
-    baselineMilliseconds: 56.2817584,
-    protectedMilliseconds: 117.3791416,
-  },
+  { title: 'Express · 1 usuário', description: 'Request local com um item; a diferença fica dentro do ruído do socket.', baseline: .811, recommended: .650, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'Para respostas pequenas, a validação não é o fator dominante.' },
+  { title: 'Express · 50 usuários', description: 'Entity → .map() sem passwordHash → DTO → JSON.', baseline: .481, recommended: 3.473, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'O custo aparece quando o lote cruza a fronteira protegida.' },
+  { title: 'Express · 10.000 usuários', description: 'Cenário extremo com TypeORM, projeção e serialização de uma resposta grande.', baseline: 5.455, recommended: 311.306, normalGuard: 311.306, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'Paginação é mais importante que qualquer micro-otimização nesse volume.' },
+  { title: 'Express · 10.000 usuários otimizado', description: 'Mesmo fluxo, usando TTOptImmut para validar e congelar o POJO de saída.', baseline: 5.455, recommended: 198.085, normalGuard: 311.306, protectedLabel: 'TS Typed · TTOptImmut', unit: 'ms', takeaway: 'A estratégia imutável foi 1,57x mais rápida que o caminho typed normal.' },
+  { title: 'NestJS · 50 usuários', description: 'Controller Nest com filtro StrictTypeError no caminho protegido.', baseline: 1.030, recommended: 1.380, normalGuard: 2.160, protectedLabel: 'TS Typed · TTOptImmut', unit: 'ms', takeaway: 'Nest e Express ficaram próximos; o adaptador HTTP não é o gargalo.' },
+  { title: 'NestJS · 10.000 usuários', description: 'Controller Nest, filtro de erros, projeção e resposta com 10.000 itens.', baseline: 56.282, recommended: 117.379, normalGuard: 258.500, protectedLabel: 'TS Typed · TTOptImmut', unit: 'ms', takeaway: 'TTOptImmut reduz aproximadamente pela metade o custo da proteção mutável.' },
+  { title: 'CSV · 1.000 linhas', description: 'Parse, validação de e-mail, remoção de passwordHash e conversão pública.', baseline: .493, recommended: 21.919, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'Validações repetidas por linha crescem quase linearmente.' },
+  { title: 'CSV · 10.000 linhas', description: 'A mesma pipeline com dez vezes mais linhas.', baseline: 3.758, recommended: 201.496, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'Evite cópias intermediárias e considere streaming em arquivos grandes.' },
+  { title: 'CSV · 50.000 linhas', description: 'Teste de estresse intencional para expor o custo acumulado.', baseline: 18.267, recommended: 1142.554, protectedLabel: 'TS Typed', unit: 'ms', takeaway: 'O custo typed cresce com o número de fronteiras, não com o tamanho textual do CSV.' },
 ];
 
-const PT: PerformanceCopy = {
-  eyebrow: 'Referência local',
-  title: 'Performance por cenário',
-  intro: 'O impacto aparece no caminho completo: hidratar dados, remover campos sensíveis, validar e devolver um contrato seguro.',
-  scenarioTitle: 'Cenários Express, Nest e CLI',
-  scenarioIntro: 'As barras mostram a mediana do mesmo fluxo. Menor é melhor; o cenário recomendado aparece junto do custo da proteção normal.',
-  withoutLabel: 'Sem TS Typed',
-  withLabel: 'Com TS Typed + TTOptImmut',
+const PT: Copy = {
+  eyebrow: 'Estudo de runtime · referência local',
+  title: 'Segurança que você consegue medir',
+  intro: 'A bateria separa validação, projeção, proteção e transporte para mostrar onde o TS Typed custa mais — e onde a estratégia imutável recupera desempenho sem remover cobertura.',
+  legendBaseline: 'Sem TS Typed',
+  legendRecommended: 'TS Typed · TTOptImmut',
+  legendGuard: 'TS Typed · protectValue',
+  chartTitle: 'Cenários reais e exagerados',
+  chartIntro: 'Mediana em milissegundos por request ou por execução. Menor é melhor. O caminho recomendado aparece em verde; o guard mutável aparece em violeta quando existe.',
   scenarios: SCENARIOS,
-  costTitle: 'Custo isolado da validação',
-  costIntro: 'Sem HTTP, banco, JSON ou serialização: apenas o trabalho do runtime do TS Typed.',
-  costs: [
-    { label: 'DTO simples UserResponse', value: '0,565 µs', detail: 'assertValue em um objeto de saída.' },
-    { label: '50 DTOs: guards / TTOptImmut', value: '0,269 / 0,060 ms', detail: 'Projeção, validação e proteção do lote.' },
-    { label: '10.000 DTOs: guards / TTOptImmut', value: '44,83 / 10,58 ms', detail: '4,2x mais rápido sem pular validação.' },
+  runtimeTitle: 'Custo isolado do runtime',
+  runtimeIntro: 'Sem banco, HTTP ou serialização: apenas a operação de validação/proteção.',
+  runtime: [
+    { label: 'assertValue(string)', value: '42,6 ns', detail: 'Validação primitiva.' },
+    { label: 'UserResponse', value: '567 ns', detail: 'Um DTO de saída.' },
+    { label: 'UserResponse[10.000]', value: '4,99 ms', detail: 'Validação de array.' },
+    { label: '10.000 · guards / TTOptImmut', value: '44,83 / 10,58 ms', detail: 'Projeção + proteção; 4,2x de diferença.' },
   ],
-  recommendationTitle: 'Sugestões de uso',
-  recommendations: [
-    { title: 'Paginar antes de otimizar', body: '10.000 itens em uma resposta é o maior gargalo, com ou sem TS Typed. Prefira páginas limitadas, cursor ou streaming.' },
-    { title: 'Use TTOptImmut para DTOs de saída', body: 'Para POJOs novos que não serão alterados, use TTOptImmut<IUserData[]>: ele valida e congela o lote, preservando Object.keys, spread e structuredClone.' },
-    { title: 'Mantenha guards nas entities', body: 'Entity, classe, Date, Map, Set ou qualquer valor mutável continuam no caminho normal. TTOptImmut é explícito e não faz fallback silencioso.' },
-    { title: 'Decorator não é atalho de performance', body: 'Use @ServerPopulated() para classificar uma violação de entidade como erro do servidor; ele melhora a semântica do erro, não reduz a validação.' },
+  guidanceTitle: 'Como usar sem pagar custo desnecessário',
+  guidance: [
+    { title: 'Paginação primeiro', body: 'Não trate 10.000 itens como contrato normal de API. Limite páginas, use cursor, selecione campos e faça streaming em pipelines.' },
+    { title: 'TTOptImmut no DTO de saída', body: 'Para POJOs que não serão alterados, valide e congele o lote com TTOptImmut<IUserData[]>. Object.keys, spread e structuredClone continuam funcionando.' },
+    { title: 'protectValue nas entities', body: 'Entities TypeORM, classes mutáveis, Date, Map e Set precisam continuar mutáveis e devem usar a proteção normal.' },
+    { title: 'Cache já aplicado', body: 'O compiler 0.1.28 reutiliza metadados do schema durante uma travessia com WeakMap. Isso reduz reflexão repetida sem compartilhar estado entre requests.' },
   ],
-  methodTitle: 'Ambiente e método do benchmark',
-  methodBody: 'Medições locais de referência, não uma promessa de capacidade em produção nem um benchmark de banco remoto.',
+  methodTitle: 'Ambiente, metodologia e limites',
+  methodBody: 'São medições locais de referência, não SLA. Reexecute no hardware e no formato de resposta da sua aplicação.',
   methodItems: [
-    'Node 22.22.3; TypeORM 0.3.28 + better-sqlite3 12.11.1 em memória.',
-    '10.000 instâncias reais de UserEntity; passwordHash é removido por .map(). Os cenários usam 1, 50 e 10.000 itens.',
-    'A bateria adicional mede Express em 1/50/10.000 usuários e o script CSV em 1.000/10.000/50.000 linhas; ambos rodam baseline tsc e build ts-typed.',
-    'HTTP: cinco amostras de 20 requisições, concorrência 4; as barras usam a latência mediana estimada.',
-    'O caminho recomendado valida a entity, projeta a resposta e executa TTOptImmut (validate-then-freeze) em UserResponse[].',
-    'CPU, versão do Node, driver, rede e formato da resposta alteram o resultado. Rode o benchmark no seu ambiente antes de definir capacidade.',
+    'Node 22.22.3; TypeORM 0.3.28 + better-sqlite3 12.11.1 em memória; 10.000 UserEntity reais.',
+    'passwordHash é removido por .map(); cada resposta é verificada para garantir o tamanho e a ausência do campo sensível.',
+    'HTTP: cinco amostras de 20 requests, concorrência 4. A bateria CSV usa 7 amostras depois de 2 warmups.',
+    'Express e Nest medem baseline, protectValue e TTOptImmut; o script CSV compara tsc e ts-typed build.',
+    'Os números mudam com CPU, Node, driver, rede, JSON e shape do objeto. O gargalo principal é o número de objetos atravessando a fronteira.',
   ],
 };
 
-const EN: PerformanceCopy = {
+const EN: Copy = {
   ...PT,
-  eyebrow: 'Local reference',
-  title: 'Performance by scenario',
-  intro: 'Cost appears in the complete path: hydrate entities, remove sensitive data, validate, and return an immutable DTO.',
-  scenarioTitle: 'HTTP response: recommended strategy',
-  scenarioIntro: 'Bars show the median latency for the same flow. Lower is better.',
-  withoutLabel: 'Without TS Typed',
-  withLabel: 'With TS Typed + TTOptImmut',
-  scenarios: SCENARIOS.map((scenario, index) => ({
-    ...scenario,
-    title: scenario.title.replace('de saída', 'output').replace('filtro', 'filter'),
-    description: scenario.title.startsWith('Express') ? 'TypeORM materializes entities; a .map() removes passwordHash; the response is serialized.' : 'The same flow runs in a Nest controller, including StrictTypeErrorFilter on the protected path.',
-    baseline: scenario.baseline.replace(',', '.'),
-    protected: scenario.protected.replace(',', '.'),
-    impact: scenario.impact.replace(' de latência', ' latency'),
-    takeaway: [
-      'TTOptImmut keeps validation and immutability. The normal accessor path measured 2.12 ms for this same scenario.',
-      'TTOptImmut avoids thousands of accessors. The normal guarded path measured 256.44 ms; validation remains complete in both cases.',
-      'The profile is close to Express: volume dominates. The same route with mutable guards measured 258.50 ms.',
-    ][index],
-  })),
-  costTitle: 'Isolated validation cost',
-  costIntro: 'No HTTP, database, JSON, or serialization: only TS Typed runtime work.',
-  costs: [
-    { label: 'Simple UserResponse DTO', value: '0.565 µs', detail: 'assertValue on one output object.' },
-    { label: '50 DTOs: guards / TTOptImmut', value: '0.269 / 0.060 ms', detail: 'Batch projection, validation, and protection.' },
-    { label: '10,000 DTOs: guards / TTOptImmut', value: '44.83 / 10.58 ms', detail: '4.2x faster without skipping validation.' },
+  eyebrow: 'Runtime study · local reference',
+  title: 'Security you can measure',
+  intro: 'The battery separates validation, projection, protection, and transport to show where TS Typed costs more — and where the immutable strategy recovers performance without dropping coverage.',
+  legendBaseline: 'Without TS Typed', legendRecommended: 'TS Typed · TTOptImmut', legendGuard: 'TS Typed · protectValue',
+  chartTitle: 'Real and intentionally extreme scenarios', chartIntro: 'Median milliseconds per request or execution. Lower is better. The recommended path is green; mutable guards are violet when available.',
+  scenarios: SCENARIOS.map((s) => ({ ...s, title: s.title.replace('usuário', 'user').replace('usuários', 'users').replace('linhas', 'rows').replace('otimizado', 'optimized'), protectedLabel: s.protectedLabel?.replace('TS Typed', 'TS Typed').replace('protectValue', 'protectValue'), description: s.description, takeaway: s.takeaway })),
+  runtimeTitle: 'Isolated runtime cost', runtimeIntro: 'No database, HTTP, or serialization: only validation/protection work.',
+  runtime: [
+    { label: 'assertValue(string)', value: '42.6 ns', detail: 'Primitive validation.' }, { label: 'UserResponse', value: '567 ns', detail: 'One output DTO.' }, { label: 'UserResponse[10,000]', value: '4.99 ms', detail: 'Array validation.' }, { label: '10,000 · guards / TTOptImmut', value: '44.83 / 10.58 ms', detail: 'Projection + protection; 4.2x difference.' },
   ],
-  recommendationTitle: 'Usage guidance',
-  recommendations: [
-    { title: 'Paginate before optimizing', body: '10,000 items in one response is the largest bottleneck, with or without TS Typed. Prefer bounded pages, cursors, or streaming.' },
-    { title: 'Use TTOptImmut for output DTOs', body: 'For fresh POJOs that will not change, use TTOptImmut<IUserData[]>: it validates and freezes the batch while preserving Object.keys, spread, and structuredClone.' },
-    { title: 'Keep guards on entities', body: 'An entity, class, Date, Map, Set, or otherwise mutable value stays on the normal path. TTOptImmut is explicit and has no silent fallback.' },
-    { title: 'A decorator is not a performance shortcut', body: 'Use @ServerPopulated() to classify an entity violation as a server error; it improves error semantics, not validation cost.' },
+  guidanceTitle: 'How to avoid unnecessary cost', guidance: [
+    { title: 'Paginate first', body: 'Do not treat 10,000 items as a normal API contract. Bound pages, use cursors, select fields, and stream large pipelines.' },
+    { title: 'TTOptImmut for output DTOs', body: 'For POJOs that will not change, validate and freeze the batch with TTOptImmut<IUserData[]>. Object.keys, spread, and structuredClone still work.' },
+    { title: 'protectValue for entities', body: 'TypeORM entities, mutable classes, Date, Map, and Set must stay mutable and use the normal protection path.' },
+    { title: 'Cache already applied', body: 'Compiler 0.1.28 reuses schema metadata during one traversal with a WeakMap, reducing repeated reflection without sharing state between requests.' },
   ],
-  methodTitle: 'Benchmark environment and method',
-  methodBody: 'Local reference measurements, not a production-capacity promise or a remote-database benchmark.',
-  methodItems: [
-    'Node 22.22.3; TypeORM 0.3.28 + better-sqlite3 12.11.1 in memory.',
-    '10,000 real UserEntity instances; passwordHash is removed with .map(). Scenarios use 1, 50, and 10,000 items.',
-    'HTTP: five samples of 20 requests, concurrency 4; bars use estimated median latency.',
-    'The recommended path validates the entity, projects the response, and runs TTOptImmut (validate-then-freeze) on UserResponse[].',
-    'CPU, Node version, driver, network, and response shape affect results. Run the benchmark in your environment before setting capacity.',
-  ],
+  methodTitle: 'Environment, methodology, and limits', methodBody: 'These are local reference measurements, not an SLA. Re-run them with your hardware and response shape.',
+  methodItems: ['Node 22.22.3; TypeORM 0.3.28 + better-sqlite3 12.11.1 in memory; 10,000 real UserEntity instances.', 'passwordHash is removed with .map(); every response is checked for size and absence of the sensitive field.', 'HTTP: five samples of 20 requests, concurrency 4. CSV uses 7 samples after 2 warmups.', 'Express and Nest measure baseline, protectValue, and TTOptImmut; the CSV script compares tsc and ts-typed build.', 'Numbers change with CPU, Node, driver, network, JSON, and object shape. The main bottleneck is object count crossing the boundary.'],
 };
 
 @Component({
-  selector: 'app-performance-page',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-performance-page', standalone: true, changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let copy = content;
-    <article class="mx-auto max-w-4xl text-slate-200">
-      <header class="border-b border-white/10 pb-8"><p class="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-cyan">{{ copy.eyebrow }}</p><h1 class="text-4xl font-bold text-white sm:text-5xl">{{ copy.title }}</h1><p class="mt-5 text-lg leading-8 text-slate-300">{{ copy.intro }}</p></header>
-      <section class="mt-10"><h2 class="text-2xl font-bold text-white">{{ copy.scenarioTitle }}</h2><p class="mt-2 text-slate-400">{{ copy.scenarioIntro }}</p><div class="mt-6 grid gap-5">@for (scenario of copy.scenarios; track scenario.title) {<section class="rounded-2xl border border-white/10 bg-slate-900/70 p-5"><div class="flex flex-col gap-2 sm:flex-row sm:justify-between"><div><h3 class="text-lg font-semibold text-white">{{ scenario.title }}</h3><p class="mt-1 text-sm leading-6 text-slate-400">{{ scenario.description }}</p></div><span class="h-fit rounded-lg bg-rose-400/10 px-3 py-1 text-sm font-bold text-rose-300">{{ scenario.impact }}</span></div><div class="mt-6 space-y-5"><div><div class="mb-2 flex justify-between gap-4 text-sm"><span>{{ copy.withoutLabel }}</span><span class="font-mono font-semibold text-white">{{ scenario.baseline }}</span></div><div class="h-4 overflow-hidden rounded-full bg-slate-800" role="img" [attr.aria-label]="copy.withoutLabel + ': ' + scenario.baseline"><div class="h-full rounded-full bg-slate-500" [style.width.%]="barWidth(scenario, false)"></div></div></div><div><div class="mb-2 flex justify-between gap-4 text-sm"><span class="text-cyan">{{ copy.withLabel }}</span><span class="font-mono font-semibold text-cyan">{{ scenario.protected }}</span></div><div class="h-4 overflow-hidden rounded-full bg-slate-800" role="img" [attr.aria-label]="copy.withLabel + ': ' + scenario.protected"><div class="h-full rounded-full bg-cyan" [style.width.%]="barWidth(scenario, true)"></div></div></div></div><p class="mt-5 border-l-2 border-cyan pl-3 text-sm leading-6 text-slate-300">{{ scenario.takeaway }}</p></section>}</div></section>
-      <section class="mt-12"><h2 class="text-2xl font-bold text-white">{{ copy.costTitle }}</h2><p class="mt-2 text-slate-400">{{ copy.costIntro }}</p><div class="mt-5 grid gap-4 sm:grid-cols-3">@for (cost of copy.costs; track cost.label) {<div class="rounded-xl border border-white/10 bg-white/[0.03] p-4"><p class="text-sm text-slate-400">{{ cost.label }}</p><p class="mt-2 font-mono text-2xl font-bold text-white">{{ cost.value }}</p><p class="mt-2 text-xs text-slate-500">{{ cost.detail }}</p></div>}</div></section>
-      <section class="mt-12"><h2 class="text-2xl font-bold text-white">{{ copy.recommendationTitle }}</h2><div class="mt-5 grid gap-4">@for (recommendation of copy.recommendations; track recommendation.title) {<div class="rounded-xl border border-cyan/20 bg-cyan/5 p-5"><h3 class="font-semibold text-cyan">{{ recommendation.title }}</h3><p class="mt-2 leading-7 text-slate-300">{{ recommendation.body }}</p></div>}</div></section>
-      <details class="group mt-12 rounded-2xl border border-white/10 bg-slate-900/70 p-5"><summary class="cursor-pointer font-semibold text-white">{{ copy.methodTitle }}</summary><div class="mt-5 border-t border-white/10 pt-5 text-sm leading-7 text-slate-300"><p>{{ copy.methodBody }}</p><ul class="mt-4 list-disc space-y-2 pl-5 text-slate-400">@for (item of copy.methodItems; track item) {<li>{{ item }}</li>}</ul></div></details>
+    <article class="performance-page">
+      <header class="performance-hero"><p class="eyebrow">{{ copy.eyebrow }}</p><h1>{{ copy.title }}</h1><p>{{ copy.intro }}</p><div class="performance-kpis"><div><strong>4,2x</strong><span>TTOptImmut vs guards</span></div><div><strong>57x</strong><span>Express · 10.000</span></div><div><strong>42,6 ns</strong><span>string validation</span></div></div></header>
+      <section class="benchmark-section"><div class="benchmark-heading"><div><p class="eyebrow">01 / {{ copy.chartTitle }}</p><h2>{{ copy.chartTitle }}</h2></div><p>{{ copy.chartIntro }}</p></div><div class="chart-legend"><span><i class="legend-dot baseline"></i>{{ copy.legendBaseline }}</span><span><i class="legend-dot recommended"></i>{{ copy.legendRecommended }}</span><span><i class="legend-dot guard"></i>{{ copy.legendGuard }}</span></div><div class="scenario-grid">@for (scenario of copy.scenarios; track scenario.title) {<section class="scenario-card"><div class="scenario-card-header"><div><h3>{{ scenario.title }}</h3><p>{{ scenario.description }}</p></div><span class="scenario-unit">{{ scenario.unit }}</span></div><div class="scenario-bars"><div class="bar-row"><span>{{ copy.legendBaseline }}</span><div class="bar-track"><div class="bar-fill baseline" [style.width.%]="barWidth(scenario.baseline, scenario)" ></div></div><strong>{{ format(scenario.baseline) }}</strong></div><div class="bar-row"><span>{{ scenario.protectedLabel ?? copy.legendRecommended }}</span><div class="bar-track"><div class="bar-fill recommended" [style.width.%]="barWidth(scenario.recommended, scenario)" ></div></div><strong>{{ format(scenario.recommended) }}</strong></div>@if (scenario.normalGuard) {<div class="bar-row"><span>{{ copy.legendGuard }}</span><div class="bar-track"><div class="bar-fill guard" [style.width.%]="barWidth(scenario.normalGuard, scenario)" ></div></div><strong>{{ format(scenario.normalGuard) }}</strong></div>}</div><p class="scenario-takeaway">{{ scenario.takeaway }}</p></section>}</div></section>
+      <section class="benchmark-section"><div class="benchmark-heading"><div><p class="eyebrow">02 / {{ copy.runtimeTitle }}</p><h2>{{ copy.runtimeTitle }}</h2></div><p>{{ copy.runtimeIntro }}</p></div><div class="runtime-grid">@for (item of copy.runtime; track item.label) {<div class="runtime-card"><span>{{ item.label }}</span><strong>{{ item.value }}</strong><small>{{ item.detail }}</small></div>}</div></section>
+      <section class="benchmark-section"><div class="benchmark-heading"><div><p class="eyebrow">03 / {{ copy.guidanceTitle }}</p><h2>{{ copy.guidanceTitle }}</h2></div></div><div class="guidance-grid">@for (item of copy.guidance; track item.title) {<article><span class="guidance-mark">✓</span><div><h3>{{ item.title }}</h3><p>{{ item.body }}</p></div></article>}</div></section>
+      <details class="method-panel"><summary>{{ copy.methodTitle }}</summary><div><p>{{ copy.methodBody }}</p><ul>@for (item of copy.methodItems; track item) {<li>{{ item }}</li>}</ul></div></details>
     </article>
   `,
 })
 export class PerformancePageComponent {
   private readonly translate = inject(TranslateService);
-
-  public get content(): PerformanceCopy { return this.translate.getCurrentLang() === 'pt' ? PT : EN; }
-  public barWidth(scenario: Scenario, isProtected: boolean): number { const value = isProtected ? scenario.protectedMilliseconds : scenario.baselineMilliseconds; return Math.max(8, (value / Math.max(scenario.baselineMilliseconds, scenario.protectedMilliseconds)) * 100); }
+  public get content(): Copy { return this.translate.getCurrentLang() === 'pt' ? PT : EN; }
+  public barWidth(value: number, scenario: Scenario): number { const max = Math.max(scenario.baseline, scenario.recommended, scenario.normalGuard ?? 0); return Math.max(5, (value / max) * 100); }
+  public format(value: number): string { return `${value.toLocaleString(this.translate.getCurrentLang() === 'pt' ? 'pt-BR' : 'en-US', { maximumFractionDigits: 3 })} ms`; }
 }

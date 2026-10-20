@@ -1,47 +1,50 @@
-<section class="relative overflow-hidden px-4 py-24 text-center">
-  <div class="mx-auto max-w-3xl">
-    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-      {{ 'landing.hero.title' | translate }}
-    </h1>
-    <p class="mt-6 text-lg text-slate-300">
-      {{ 'landing.hero.subtitle' | translate }}
-    </p>
-    <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-      <a [routerLink]="['/', lang, 'docs', 'getting-started']" class="rounded-md bg-royal px-6 py-3 font-semibold text-white hover:bg-deep">
-        {{ 'landing.cta.start' | translate }}
-      </a>
-      <a href="https://github.com/ts-typed" target="_blank" rel="noopener" class="rounded-md border border-white/20 px-6 py-3 font-semibold text-slate-200 hover:border-cyan hover:text-cyan">
-        GitHub
-      </a>
-    </div>
-  </div>
-</section>
-
-<section class="mx-auto max-w-5xl px-4 py-16">
-  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-    @for (feature of ['noSchema', 'valueObject', 'nestjs', 'validators', 'safeErrors', 'opensource']; track feature) {
-      <div class="rounded-lg border border-white/10 bg-white/5 p-6">
-        <h3 class="font-semibold text-cyan">{{ 'landing.features.' + feature + '.title' | translate }}</h3>
-        <p class="mt-2 text-sm text-slate-300">{{ 'landing.features.' + feature + '.body' | translate }}</p>
+<main class="landing-shell">
+  <section class="landing-hero">
+    <div class="landing-hero-grid" aria-hidden="true"></div>
+    <div class="landing-hero-content">
+      <p class="eyebrow"><span class="status-dot"></span>{{ 'landing.hero.eyebrow' | translate }}</p>
+      <h1>{{ 'landing.hero.title' | translate }}</h1>
+      <p class="landing-lede">{{ 'landing.hero.subtitle' | translate }}</p>
+      <div class="landing-actions">
+        <a [routerLink]="['/', lang, 'docs', 'getting-started']" class="button-primary">{{ 'landing.cta.start' | translate }} <span aria-hidden="true">→</span></a>
+        <a href="https://github.com/ts-typed" target="_blank" rel="noopener" class="button-secondary">GitHub <span aria-hidden="true">↗</span></a>
       </div>
-    }
-  </div>
-</section>
-
-<section class="mx-auto max-w-4xl px-4 py-16">
-  <h2 class="text-center text-2xl font-bold text-white">{{ 'landing.example.title' | translate }}</h2>
-  <pre class="mt-6 overflow-x-auto rounded-lg border border-white/10 bg-slate-950 p-6 text-sm text-slate-200"><code>{{ 'landing.example.code' | translate }}</code></pre>
-</section>
-
-<section class="mx-auto max-w-4xl px-4 py-16 text-center">
-  <div class="flex flex-wrap items-center justify-center gap-10">
-    <div>
-      <p class="text-3xl font-extrabold text-cyan">{{ stars() ?? '—' }}</p>
-      <p class="text-sm text-slate-400">{{ 'landing.metrics.stars' | translate }}</p>
+      <div class="landing-proof"><span>{{ 'landing.hero.proof' | translate }}</span><span class="proof-line"></span><code>TypeScript → Runtime</code></div>
     </div>
-    <div>
-      <p class="text-3xl font-extrabold text-cyan">{{ downloads() ?? '—' }}</p>
-      <p class="text-sm text-slate-400">{{ 'landing.metrics.downloads' | translate }}</p>
+    <div class="hero-code-card" aria-label="TypeScript example">
+      <div class="code-card-top"><span class="code-dots"><i></i><i></i><i></i></span><span>create-user.dto.ts</span><span class="code-badge">typed</span></div>
+      <pre><code><span class="code-keyword">interface</span> <span class="code-type">UserResponse</span> {{ '{' }}
+  id: <span class="code-type">number</span>;
+  email: <span class="code-type">Email</span>;
+  name: <span class="code-type">string</span>;
+{{ '}' }}
+
+<span class="code-comment">// one type, enforced at runtime</span>
+<span class="code-keyword">return</span> <span class="code-function">validate</span>(payload);</code></pre>
+      <div class="code-card-foot"><span class="success-mark">✓</span> {{ 'landing.hero.runtimeGuard' | translate }}</div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <section class="landing-stats" aria-label="Project metrics">
+    <div><span class="stat-value">{{ stars() ?? '—' }}</span><span class="stat-label">{{ 'landing.metrics.stars' | translate }}</span></div>
+    <div><span class="stat-value">{{ downloads() ?? '—' }}</span><span class="stat-label">{{ 'landing.metrics.downloads' | translate }}</span></div>
+    <div><span class="stat-value">0</span><span class="stat-label">{{ 'landing.metrics.schemas' | translate }}</span></div>
+    <div><span class="stat-value">100%</span><span class="stat-label">{{ 'landing.metrics.types' | translate }}</span></div>
+  </section>
+
+  <section class="landing-section">
+    <div class="section-heading"><div><p class="eyebrow">{{ 'landing.features.eyebrow' | translate }}</p><h2>{{ 'landing.features.heading' | translate }}</h2></div><p>{{ 'landing.features.intro' | translate }}</p></div>
+    <div class="feature-grid">
+      @for (feature of ['noSchema', 'valueObject', 'nestjs', 'validators', 'safeErrors', 'opensource']; track feature; let index = $index) {
+        <article class="feature-card"><span class="feature-index">0{{ index + 1 }}</span><h3>{{ 'landing.features.' + feature + '.title' | translate }}</h3><p>{{ 'landing.features.' + feature + '.body' | translate }}</p><a [routerLink]="['/', lang, 'docs', feature === 'nestjs' ? 'nestjs' : feature === 'validators' ? 'validators' : 'introduction']" class="feature-link">{{ 'landing.features.learnMore' | translate }} <span aria-hidden="true">→</span></a></article>
+      }
+    </div>
+  </section>
+
+  <section class="landing-example landing-section">
+    <div class="example-copy"><p class="eyebrow">{{ 'landing.example.eyebrow' | translate }}</p><h2>{{ 'landing.example.title' | translate }}</h2><p>{{ 'landing.example.body' | translate }}</p><a [routerLink]="['/', lang, 'docs', 'getting-started']" class="text-link">{{ 'landing.cta.readDocs' | translate }} <span aria-hidden="true">→</span></a></div>
+    <pre class="example-code"><code>{{ 'landing.example.code' | translate }}</code></pre>
+  </section>
+
+  <section class="landing-cta landing-section"><div><p class="eyebrow">{{ 'landing.cta.eyebrow' | translate }}</p><h2>{{ 'landing.cta.title' | translate }}</h2><p>{{ 'landing.cta.body' | translate }}</p></div><a [routerLink]="['/', lang, 'docs', 'performance']" class="button-primary">{{ 'landing.cta.performance' | translate }} <span aria-hidden="true">→</span></a></section>
+</main>

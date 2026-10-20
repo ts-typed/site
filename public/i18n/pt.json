@@ -2,11 +2,18 @@
   "nav": { "docs": "Docs" },
   "landing": {
     "hero": {
+      "eyebrow": "Runtime safety para TypeScript",
       "title": "Seus tipos sempre foram o contrato. Agora eles são aplicados.",
-      "subtitle": "O TS Typed instrumenta o TypeScript que você já escreveu para validar seus dados em tempo de execução — sem schema duplicado, sem decorator por campo, sem divergência entre o que seu tipo diz e o que seu código realmente verifica."
+      "subtitle": "O TS Typed instrumenta o TypeScript que você já escreveu para validar seus dados em tempo de execução — sem schema duplicado, sem decorator por campo, sem divergência entre o que seu tipo diz e o que seu código realmente verifica.",
+      "proof": "Feito para fronteiras de dados",
+      "runtimeGuard": "contrato validado em runtime"
     },
-    "cta": { "start": "Comece agora" },
+    "cta": { "start": "Comece agora", "readDocs": "Ler a documentação", "eyebrow": "Construa com confiança", "title": "Seu TypeScript pode fazer mais.", "body": "Comece com um projeto TypeScript puro, Express ou NestJS e mantenha segurança explícita em cada fronteira.", "performance": "Ver os benchmarks" },
     "features": {
+      "eyebrow": "Uma camada de segurança, não outro schema",
+      "heading": "O contrato que acompanha o código",
+      "intro": "Validação, value objects e erros seguros conectados ao TypeScript que sua equipe já mantém.",
+      "learnMore": "Explorar",
       "noSchema": { "title": "Sem schema duplicado", "body": "Seus tipos TypeScript existentes SÃO o contrato de runtime. Nada mais pra manter sincronizado." },
       "valueObject": { "title": "Tipos de valor auto-construídos", "body": "Declare um campo como CPF, Email ou seu próprio ValueObject — um valor cru que cruza essa fronteira se torna uma instância validada automaticamente." },
       "nestjs": { "title": "Integração com NestJS", "body": "Um filtro de exceção já pronto mapeia violações para respostas HTTP seguras, com mensagens customizadas por campo e distinção entre entidade e DTO." },
@@ -15,10 +22,12 @@
       "opensource": { "title": "Código aberto", "body": "Apache-2.0, no GitHub, construído publicamente." }
     },
     "example": {
+      "eyebrow": "Comece em minutos",
       "title": "Veja funcionando",
+      "body": "Sem decorators espalhados pelo modelo. O compiler encontra as fronteiras e mantém o contrato visível no código.",
       "code": "class CreateUserDto {\n  public readonly cpf!: CPF;\n  public readonly email!: Email;\n}\n\n// o cliente envia strings cruas — o TS Typed valida e\n// auto-constrói os dois campos, sem decorators."
     },
-    "metrics": { "stars": "Estrelas no GitHub", "downloads": "Downloads mensais no npm" }
+    "metrics": { "stars": "Estrelas no GitHub", "downloads": "Downloads mensais no npm", "schemas": "Schemas duplicados", "types": "Contrato baseado em tipos" }
   },
   "docs": {
     "nav": {
@@ -35,7 +44,9 @@
       "performance": "Performance e Benchmarks",
       "optimizations": "Otimizações",
       "version": "Versão da documentação",
-      "menu": "Menu da documentação"
+      "menu": "Menu da documentação",
+      "openMenu": "Abrir menu da documentação",
+      "closeMenu": "Fechar menu da documentação"
     }
   }
 }
