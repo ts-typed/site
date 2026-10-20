@@ -33,7 +33,8 @@
       "validators": "Validadores",
       "limitations": "Limitações Conhecidas",
       "performance": "Performance e Benchmarks",
-      "version": "Versão da documentação"
+      "version": "Versão da documentação",
+      "menu": "Menu da documentação"
     }
   }
 }
