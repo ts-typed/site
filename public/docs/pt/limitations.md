@@ -32,6 +32,28 @@ O TS Typed tem um escopo intencionalmente delimitado. As limitações abaixo sã
 - **Uma união que inclui um tipo `ValueObject` não é construída automaticamente.** Por exemplo, `CPF | undefined` não é construído automaticamente.
 - **Uma classe alcançada por uma instalação em `node_modules` via symlink ou workspace não é detectada.**
 
+## Referência de desempenho
+
+Os números a seguir são medições locais de referência, não um benchmark com banco remoto nem uma promessa de capacidade em produção. Foram coletados no Node 22.22.3, usando TypeORM e `better-sqlite3` em memória, com 10.000 instâncias de `UserEntity`. O formato da resposta remove `passwordHash`. Os resultados HTTP usam cinco amostras de 20 requisições cada, com concorrência 4.
+
+Os microbenchmarks distinguem duas operações:
+
+- `assertValue` valida um valor e relata violações; não cria um objeto de resposta protegido.
+- `protectValue` projeta e protege o valor de resposta. A etapa de projeção está incluída no resultado `project+protectValue` abaixo.
+
+| Operação | Mediana |
+| --- | ---: |
+| Validação de primitivo | 29,0 ns |
+| Objeto `UserResponse` | 536 ns |
+| `UserResponse[100]` | 58,9 µs |
+| `assertValue(UserResponse[10k])` | 6,20 ms |
+| `assertValue(UserEntity[10k])` | 7,58 ms |
+| `project+protectValue(UserResponse[10k])` | 47,1 ms |
+
+Em throughput HTTP, a linha de base sem proteção foi de 77,06 req/s com Express e 76,28 req/s com Nest. O caminho protegido mediu 14,59 req/s com Express e 14,41 req/s com Nest.
+
+Esses números testam intencionalmente sob estresse um formato de resposta ruim em produção: retornar 10.000 usuários em uma única resposta. Em produção, prefira paginação (com tamanhos de página limitados) antes de otimizar esse caminho. Use os valores para comparar formatos e estratégias de proteção localmente, não como promessa para outro runtime, banco, rede ou implantação.
+
 ---
 
 Se alguma dessas limitações bloquear o seu caso de uso, o próximo passo geralmente é ajustar a fronteira: tornar o tipo explícito, importar a classe pelo nome ou manter uma etapa de validação própria onde o TS Typed não alcança. Para os mecanismos que cobrem essas áreas, veja [Decoradores](./decorators.md) e [Genéricos](./generics.md).

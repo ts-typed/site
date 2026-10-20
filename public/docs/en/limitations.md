@@ -32,6 +32,28 @@ TS Typed is intentionally scoped. The limitations below are **deliberate scope b
 - **A union that includes a `ValueObject` type does not auto-construct.** For example, `CPF | undefined` does not auto-construct.
 - **A class reached through a symlinked or workspace `node_modules` install is not detected.**
 
+## Performance reference
+
+The following figures are local reference measurements, not a remote-database benchmark or a production capacity promise. They were collected on Node 22.22.3 with TypeORM and `better-sqlite3` in memory, using 10,000 `UserEntity` instances. The response shape removes `passwordHash`. The HTTP results use five samples of 20 requests each, with concurrency 4.
+
+The microbenchmarks separate two operations:
+
+- `assertValue` validates a value and reports violations; it does not create a protected response object.
+- `protectValue` projects and protects the response value. The projection step is included in the `project+protectValue` result below.
+
+| Operation | Median |
+| --- | ---: |
+| Primitive validation | 29.0 ns |
+| `UserResponse` object | 536 ns |
+| `UserResponse[100]` | 58.9 µs |
+| `assertValue(UserResponse[10k])` | 6.20 ms |
+| `assertValue(UserEntity[10k])` | 7.58 ms |
+| `project+protectValue(UserResponse[10k])` | 47.1 ms |
+
+For HTTP throughput, the unprotected baseline was 77.06 req/s with Express and 76.28 req/s with Nest. The protected path measured 14.59 req/s with Express and 14.41 req/s with Nest.
+
+These numbers intentionally stress-test a bad production response shape: returning 10,000 users in one response. In production, prefer pagination (and bounded page sizes) before optimizing this path. Treat the figures as a way to compare shapes and protection strategies locally, not as a promise about another runtime, database, network, or deployment.
+
 ---
 
 If one of these limitations blocks your use case, the right next step is usually to adjust the boundary: make the type explicit, import the class by name, or keep a validation step of your own where TS Typed does not reach. For the mechanisms that do cover these areas, see [Decorators](./decorators.md) and [Generics](./generics.md).
