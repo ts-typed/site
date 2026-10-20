@@ -33,6 +33,36 @@ interface PerformanceCopy {
 
 const SCENARIOS: readonly Scenario[] = [
   {
+    title: 'Express: 10.000 usuários, proteção normal',
+    description: 'O mesmo endpoint remove passwordHash e deixa o DTO mutável com accessors de proteção.',
+    baseline: '5,46 ms',
+    protected: '311,31 ms',
+    impact: '+5.603% de latência',
+    takeaway: 'A proteção completa é a opção correta para valores mutáveis, mas o custo cresce com cada item e campo atravessado.',
+    baselineMilliseconds: 5.455208,
+    protectedMilliseconds: 311.305833,
+  },
+  {
+    title: 'Express: 10.000 usuários, TTOptImmut',
+    description: 'A projeção gera POJOs, valida o grafo uma vez e congela o resultado para uma resposta somente leitura.',
+    baseline: '5,46 ms',
+    protected: '198,08 ms',
+    impact: '+3.531% de latência',
+    takeaway: 'A otimização reduziu o caminho protegido em 1,57x nesta execução. Use-a apenas quando a resposta não precisar ser mutável.',
+    baselineMilliseconds: 5.455208,
+    protectedMilliseconds: 198.084625,
+  },
+  {
+    title: 'Script CSV: 10.000 linhas',
+    description: 'Parse, validação de e-mail, remoção de passwordHash e conversão para o formato público.',
+    baseline: '3,76 ms',
+    protected: '201,50 ms',
+    impact: '+5.260% de latência',
+    takeaway: 'O custo é quase linear: em pipelines grandes, streaming, lotes e menos cópias intermediárias importam mais que microajustes.',
+    baselineMilliseconds: 3.758167,
+    protectedMilliseconds: 201.496417,
+  },
+  {
     title: 'Express: 50 DTOs de saída',
     description: 'TypeORM materializa entidades, um .map() remove passwordHash e a resposta é serializada.',
     baseline: '1,19 ms',
@@ -67,9 +97,9 @@ const SCENARIOS: readonly Scenario[] = [
 const PT: PerformanceCopy = {
   eyebrow: 'Referência local',
   title: 'Performance por cenário',
-  intro: 'O impacto aparece no caminho completo: hidratar entities, remover dados sensíveis, validar e devolver uma DTO imutável.',
-  scenarioTitle: 'Resposta HTTP: estratégia recomendada',
-  scenarioIntro: 'As barras mostram a latência mediana do mesmo fluxo. Menor é melhor.',
+  intro: 'O impacto aparece no caminho completo: hidratar dados, remover campos sensíveis, validar e devolver um contrato seguro.',
+  scenarioTitle: 'Cenários Express, Nest e CLI',
+  scenarioIntro: 'As barras mostram a mediana do mesmo fluxo. Menor é melhor; o cenário recomendado aparece junto do custo da proteção normal.',
   withoutLabel: 'Sem TS Typed',
   withLabel: 'Com TS Typed + TTOptImmut',
   scenarios: SCENARIOS,
@@ -92,6 +122,7 @@ const PT: PerformanceCopy = {
   methodItems: [
     'Node 22.22.3; TypeORM 0.3.28 + better-sqlite3 12.11.1 em memória.',
     '10.000 instâncias reais de UserEntity; passwordHash é removido por .map(). Os cenários usam 1, 50 e 10.000 itens.',
+    'A bateria adicional mede Express em 1/50/10.000 usuários e o script CSV em 1.000/10.000/50.000 linhas; ambos rodam baseline tsc e build ts-typed.',
     'HTTP: cinco amostras de 20 requisições, concorrência 4; as barras usam a latência mediana estimada.',
     'O caminho recomendado valida a entity, projeta a resposta e executa TTOptImmut (validate-then-freeze) em UserResponse[].',
     'CPU, versão do Node, driver, rede e formato da resposta alteram o resultado. Rode o benchmark no seu ambiente antes de definir capacidade.',
