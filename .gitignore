@@ -42,3 +42,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Vercel local project metadata and downloaded environment variables
+/.vercel/
+/.env.local
