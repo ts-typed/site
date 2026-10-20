@@ -23,4 +23,16 @@ describe('PerformancePageComponent', () => {
     expect(text).toContain('Without TS Typed');
     expect(text).toContain('10,000');
   });
+
+  it('reveals the measurement details for an individual scenario', (): void => {
+    const infoButton = fixture.nativeElement.querySelector('.info-button') as HTMLButtonElement;
+
+    expect(infoButton).toBeTruthy();
+    infoButton.click();
+    fixture.detectChanges();
+
+    const details = fixture.nativeElement.querySelector('.scenario-details') as HTMLElement;
+    expect(details).toBeTruthy();
+    expect(details.textContent).toContain('How it was measured');
+  });
 });
