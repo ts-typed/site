@@ -8,10 +8,10 @@ TS Typed works on top of a normal TypeScript project. You need Node.js and a pro
 
 ## Step 1: Install the compiler
 
-Add `@ts-typed/compiler` as a development dependency:
+Add `@ts-typed/core` as a development dependency:
 
 ```bash
-npm install --save-dev @ts-typed/compiler
+npm install --save-dev @ts-typed/core
 ```
 
 The compiler is a build-time tool. Your application code does not change its runtime dependencies because of it.

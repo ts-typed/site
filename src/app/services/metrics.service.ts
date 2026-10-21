@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin, of, catchError, map } from 'rxjs';
 
 const REPOS = ['ts-typed/compiler', 'ts-typed/nestjs', 'ts-typed/validators'];
-const PACKAGES = ['@ts-typed/compiler', '@ts-typed/nestjs', '@ts-typed/validators'];
+const PACKAGES = ['@ts-typed/core', '@ts-typed/nestjs', '@ts-typed/validators'];
 
 export interface ProjectMetrics {
   readonly stars: number | null;

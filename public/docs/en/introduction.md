@@ -6,7 +6,7 @@ TS Typed turns the types you already write in TypeScript into runtime enforcemen
 
 TS Typed is a set of packages that work together:
 
-- **@ts-typed/compiler** instruments your TypeScript project so runtime values are checked against the types the compiler already knows about.
+- **@ts-typed/core** instruments your TypeScript project so runtime values are checked against the types the compiler already knows about.
 - **@ts-typed/nestjs** integrates those checks into NestJS applications.
 - **@ts-typed/validators** provides ready-made value objects, such as `Email`, that you can use directly in your types.
 

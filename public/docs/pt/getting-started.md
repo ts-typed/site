@@ -8,10 +8,10 @@ O TS Typed funciona sobre um projeto TypeScript comum. Você precisa de Node.js 
 
 ## Passo 1: instalar o compilador
 
-Adicione `@ts-typed/compiler` como dependência de desenvolvimento:
+Adicione `@ts-typed/core` como dependência de desenvolvimento:
 
 ```bash
-npm install --save-dev @ts-typed/compiler
+npm install --save-dev @ts-typed/core
 ```
 
 O compilador é uma ferramenta de build. Por causa dele, as dependências de execução da sua aplicação não mudam.

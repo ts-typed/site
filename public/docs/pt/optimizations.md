@@ -6,7 +6,7 @@ Use `TTOptImmut<T>` quando uma resposta é formada por POJOs e arrays novos e
 deve ser somente leitura depois da validação.
 
 ```ts
-import type { TTOptImmut } from '@ts-typed/compiler';
+import type { TTOptImmut } from '@ts-typed/core';
 
 interface IUserData { id: number; name: string; email: string; }
 type UsersResponse = TTOptImmut<IUserData[]>;

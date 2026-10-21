@@ -1,6 +1,6 @@
 # Validators
 
-The **`@ts-typed/validators`** package provides document and data validators built on the `ValueObject` from [`@ts-typed/compiler`](./core-concepts.md). You declare a type, and the compiler automatically constructs and validates it at every typed boundary. You don't need a decorator or a manual `new`.
+The **`@ts-typed/validators`** package provides document and data validators built on the `ValueObject` from [`@ts-typed/core`](./core-concepts.md). You declare a type, and the compiler automatically constructs and validates it at every typed boundary. You don't need a decorator or a manual `new`.
 
 ## Installation
 
@@ -28,7 +28,7 @@ class UserService {
 }
 ```
 
-With the `@ts-typed/compiler` build step enabled, the raw string sent by the client is converted into a validated instance as soon as it is assigned. Application code never calls `new` directly. If the value is invalid, an error is thrown before `create()` runs.
+With the `@ts-typed/core` build step enabled, the raw string sent by the client is converted into a validated instance as soon as it is assigned. Application code never calls `new` directly. If the value is invalid, an error is thrown before `create()` runs.
 
 Each class behaves like a string in the places where that matters, such as `console.log`, template literals, `JSON.stringify`, and every native `String.prototype` method. Each class also adds its own validation and formatting methods.
 

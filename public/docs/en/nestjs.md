@@ -1,13 +1,13 @@
 # NestJS Integration
 
-The **`@ts-typed/nestjs`** package connects [`@ts-typed/compiler`](./core-concepts.md) to NestJS. When a typed boundary detects a contract violation, it throws a `StrictTypeError`. This package turns that error into an HTTP response with a sensible status code, a clear message, and the diagnostic details your clients need.
+The **`@ts-typed/nestjs`** package connects [`@ts-typed/core`](./core-concepts.md) to NestJS. When a typed boundary detects a contract violation, it throws a `StrictTypeError`. This package turns that error into an HTTP response with a sensible status code, a clear message, and the diagnostic details your clients need.
 
 It also gives you a per-field escape hatch for custom messages and statuses, which covers much of what `class-validator` is normally used for.
 
 ## Installation
 
 ```bash
-npm install --save-dev @ts-typed/compiler @ts-typed/nestjs
+npm install --save-dev @ts-typed/core @ts-typed/nestjs
 npx ts-typed init
 ```
 
@@ -86,7 +86,7 @@ A class field looks the same whether it comes from a TypeORM Entity or a DTO. An
 Mark your Entity classes with `@ServerPopulated()`:
 
 ```ts
-import { ServerPopulated } from '@ts-typed/nestjs'; // re-exported from @ts-typed/compiler
+import { ServerPopulated } from '@ts-typed/nestjs'; // re-exported from @ts-typed/core
 import { Entity, Column } from 'typeorm';
 
 @Entity({ name: 'todos' })
@@ -104,7 +104,7 @@ With this decorator in place, a corrupted `status` value read back from the data
 `@TypeErrorResponse()` lets you customize the message and, optionally, the status code of a single field:
 
 ```ts
-import { TypeErrorResponse } from '@ts-typed/nestjs'; // re-exported from @ts-typed/compiler
+import { TypeErrorResponse } from '@ts-typed/nestjs'; // re-exported from @ts-typed/core
 
 export class CreateUserDto {
   @TypeErrorResponse('Invalid email', 422)
@@ -121,10 +121,10 @@ Like the rest of TS Typed, this is a single-violation mechanism — pair it with
 
 ## `AggregateErrors()`: collecting every violation in one response
 
-Decorate a DTO with `AggregateErrors()` (from `@ts-typed/compiler`) to collect every violation found in it — at any depth, including nested objects and an optional/nullable nested DTO — into one `AggregateStrictTypeError`, instead of TS Typed's default fail-fast behavior:
+Decorate a DTO with `AggregateErrors()` (from `@ts-typed/core`) to collect every violation found in it — at any depth, including nested objects and an optional/nullable nested DTO — into one `AggregateStrictTypeError`, instead of TS Typed's default fail-fast behavior:
 
 ```ts
-import { AggregateErrors } from '@ts-typed/compiler';
+import { AggregateErrors } from '@ts-typed/core';
 
 @AggregateErrors()
 export class CreateUserDto {
@@ -144,7 +144,7 @@ This works both for a plain request body and with Nest's recommended `Validation
 ```ts
 import { Catch } from '@nestjs/common';
 import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
-import { StrictTypeError } from '@ts-typed/compiler';
+import { StrictTypeError } from '@ts-typed/core';
 import { StrictTypeHttpError } from '@ts-typed/nestjs';
 
 @Catch(StrictTypeError)

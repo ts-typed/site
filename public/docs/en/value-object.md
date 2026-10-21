@@ -6,7 +6,7 @@ TS Typed provides `ValueObject`, an abstract base class that lets you write thes
 
 ## The `ValueObject` base class
 
-`ValueObject` is exported from `@ts-typed/compiler`. It extends the boxed `String` object, so a value object behaves like a string in everyday use:
+`ValueObject` is exported from `@ts-typed/core`. It extends the boxed `String` object, so a value object behaves like a string in everyday use:
 
 - `console.log` shows the raw value.
 - Template literals and string concatenation use the raw value.
@@ -15,7 +15,7 @@ TS Typed provides `ValueObject`, an abstract base class that lets you write thes
 At the same time, it carries your own validation rules and your own methods.
 
 ```ts
-import { ValueObject } from '@ts-typed/compiler';
+import { ValueObject } from '@ts-typed/core';
 
 export class Email extends ValueObject {
   public constructor(raw: string) {
@@ -112,14 +112,14 @@ class BillingService {
 
 ### Detection rules
 
-The compiler detects a `ValueObject` subclass by walking its full base-class chain. A class that extends an intermediate subclass of `ValueObject` is still recognized. The compiler also verifies that the matched ancestor is genuinely the `ValueObject` exported by `@ts-typed/compiler`, by checking its declaration file path. A coincidentally named class from another library does not count.
+The compiler detects a `ValueObject` subclass by walking its full base-class chain. A class that extends an intermediate subclass of `ValueObject` is still recognized. The compiler also verifies that the matched ancestor is genuinely the `ValueObject` exported by `@ts-typed/core`, by checking its declaration file path. A coincidentally named class from another library does not count.
 
 ## Writing your own value objects
 
 Any domain concept with a string representation can follow the same pattern. Here is a value object for a Brazilian CPF number that strips formatting and exposes a masked form:
 
 ```ts
-import { ValueObject } from '@ts-typed/compiler';
+import { ValueObject } from '@ts-typed/core';
 
 export class CPF extends ValueObject {
   public constructor(raw: string) {

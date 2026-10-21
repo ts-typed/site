@@ -6,12 +6,12 @@
       <h1>{{ 'landing.hero.title' | translate }}</h1>
       <p class="landing-lede">{{ 'landing.hero.subtitle' | translate }}</p>
       <div class="landing-actions">
-        <a [routerLink]="['/', lang, 'docs', 'getting-started']" class="button-primary">{{ 'landing.cta.start' | translate }} <span aria-hidden="true">→</span></a>
+        <a [routerLink]="['/', lang, 'docs']" class="button-primary">{{ 'landing.cta.start' | translate }} <span aria-hidden="true">→</span></a>
         <a href="https://github.com/ts-typed" target="_blank" rel="noopener" class="button-secondary">GitHub <span aria-hidden="true">↗</span></a>
       </div>
       <div class="landing-proof"><span>{{ 'landing.hero.proof' | translate }}</span><span class="proof-line"></span><code>TypeScript → Runtime</code></div>
     </div>
-    <div class="hero-code-card hero-contract-card" aria-label="TypeScript to JavaScript comparison">
+    <div class="hero-code-card hero-contract-card" [attr.aria-label]="'landing.contract.ariaLabel' | translate">
       <div class="code-card-top"><span class="code-dots"><i></i><i></i><i></i></span><span>User contract</span><span class="code-badge">runtime</span></div>
       <div class="hero-contract-block"><span class="hero-contract-label">{{ 'landing.contract.typescriptLabel' | translate }}</span><pre><code>{{ 'landing.contract.typescript' | translate }}</code></pre></div>
       <div class="hero-contract-block"><span class="hero-contract-label">{{ 'landing.contract.tscLabel' | translate }}</span><pre><code>{{ 'landing.contract.tsc' | translate }}</code></pre></div>
@@ -20,7 +20,7 @@
     </div>
   </section>
 
-  <section class="landing-stats" aria-label="Project metrics">
+  <section class="landing-stats" [attr.aria-label]="'landing.metrics.ariaLabel' | translate">
     <div><span class="stat-value">{{ stars() ?? '—' }}</span><span class="stat-label">{{ 'landing.metrics.stars' | translate }}</span></div>
     <div><span class="stat-value">{{ downloads() ?? '—' }}</span><span class="stat-label">{{ 'landing.metrics.downloads' | translate }}</span></div>
     <div><span class="stat-value">0</span><span class="stat-label">{{ 'landing.metrics.schemas' | translate }}</span></div>
@@ -31,7 +31,7 @@
     <div class="section-heading"><div><p class="eyebrow">{{ 'landing.features.eyebrow' | translate }}</p><h2>{{ 'landing.features.heading' | translate }}</h2></div><p>{{ 'landing.features.intro' | translate }}</p></div>
     <div class="feature-grid">
       @for (feature of ['noSchema', 'valueObject', 'nestjs', 'validators', 'safeErrors', 'opensource']; track feature; let index = $index) {
-        <article class="feature-card"><span class="feature-index">0{{ index + 1 }}</span><h3>{{ 'landing.features.' + feature + '.title' | translate }}</h3><p>{{ 'landing.features.' + feature + '.body' | translate }}</p><a [routerLink]="['/', lang, 'docs', feature === 'nestjs' ? 'nestjs' : feature === 'validators' ? 'validators' : 'introduction']" class="feature-link">{{ 'landing.features.learnMore' | translate }} <span aria-hidden="true">→</span></a></article>
+        <article class="feature-card"><span class="feature-index">0{{ index + 1 }}</span><h3>{{ 'landing.features.' + feature + '.title' | translate }}</h3><p>{{ 'landing.features.' + feature + '.body' | translate }}</p><a [routerLink]="featureRoute(feature)" class="feature-link">{{ 'landing.features.learnMore' | translate }} <span aria-hidden="true">→</span></a></article>
       }
     </div>
   </section>

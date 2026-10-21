@@ -16,6 +16,7 @@
       "typescriptLabel": "TypeScript (source code)",
       "tscLabel": "tsc (compiled code that actually runs)",
       "typedLabel": "ts-typed (code with type guarantees)",
+      "ariaLabel": "TypeScript to JavaScript comparison",
       "typescript": "interface User {\n  id: number;\n  name: string;\n}\n\nfunction loadUser(user: User) {\n  return findUserById(user.id);\n}",
       "tsc": "function loadUser(user) {\n  return findUserById(user.id);\n}",
       "typed": "function loadUser(user) {\n  if (typeof user.name !== 'string') {\n    throw new StrictTypeError('user.name');\n  }\n  if (typeof user.id !== 'number') {\n    throw new StrictTypeError('user.id');\n  }\n  return findUserById(user.id);\n}"
@@ -39,7 +40,7 @@
       "body": "No decorators scattered across your model. The compiler finds boundaries and keeps the contract visible in code.",
       "code": "interface CreateUserDto {\n  email: Email;\n  name: string;\n}\n\nfunction createUser(dto: CreateUserDto) {\n  return users.create(dto);\n}\n\n// the type written in TS is enforced at runtime too."
     },
-    "metrics": { "stars": "GitHub stars", "downloads": "Monthly npm downloads", "schemas": "Duplicate schemas", "types": "Type-based contract" }
+    "metrics": { "stars": "GitHub stars", "downloads": "Monthly npm downloads", "schemas": "Duplicate schemas", "types": "Type-based contract", "ariaLabel": "Project metrics" }
   },
   "docs": {
     "nav": {
@@ -50,15 +51,32 @@
       "decorators": "Decorators",
       "valueObject": "ValueObject",
       "generics": "Generics",
-      "nestjs": "NestJS Integration",
+      "nestjs": "NestJS",
       "validators": "Validators",
       "limitations": "Known Limitations",
       "performance": "Performance & Benchmarks",
       "optimizations": "Optimizations",
       "version": "Documentation version",
+      "documentation": "Documentation",
+      "frameworks": "Frameworks",
       "menu": "Documentation menu",
       "openMenu": "Open documentation menu",
-      "closeMenu": "Close documentation menu"
+      "closeMenu": "Close documentation menu",
+      "typescript": "TypeScript",
+      "express": "Express",
+      "expand": "Expand",
+      "collapse": "Collapse",
+      "implementation": "Implementation",
+      "requestsDtos": "Requests & DTOs",
+      "responses": "Responses",
+      "errors": "Errors",
+      "practicesExamples": "Practices & Examples"
+    },
+    "navigation": {
+      "label": "Document navigation",
+      "previous": "Previous",
+      "next": "Next",
+      "deepen": "Go deeper"
     }
   }
 }

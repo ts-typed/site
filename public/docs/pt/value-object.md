@@ -6,7 +6,7 @@ O TS Typed oferece `ValueObject`, uma classe base abstrata que permite escrever 
 
 ## A classe base `ValueObject`
 
-`ValueObject` é exportada por `@ts-typed/compiler`. Ela estende o objeto `String` empacotado, então um value object se comporta como uma string no uso do dia a dia:
+`ValueObject` é exportada por `@ts-typed/core`. Ela estende o objeto `String` empacotado, então um value object se comporta como uma string no uso do dia a dia:
 
 - `console.log` mostra o valor bruto.
 - Template literals e concatenação de strings usam o valor bruto.
@@ -15,7 +15,7 @@ O TS Typed oferece `ValueObject`, uma classe base abstrata que permite escrever 
 Ao mesmo tempo, ele carrega as suas regras de validação e os seus próprios métodos.
 
 ```ts
-import { ValueObject } from '@ts-typed/compiler';
+import { ValueObject } from '@ts-typed/core';
 
 export class Email extends ValueObject {
   public constructor(raw: string) {
@@ -112,14 +112,14 @@ class BillingService {
 
 ### Regras de detecção
 
-O compilador detecta uma subclasse de `ValueObject` percorrendo toda a cadeia de classes base. Uma classe que estende uma subclasse intermediária de `ValueObject` continua sendo reconhecida. O compilador também verifica se o ancestral encontrado é de fato o `ValueObject` exportado por `@ts-typed/compiler`, comparando o caminho do arquivo de declaração. Uma classe de mesmo nome vinda de outra biblioteca não conta.
+O compilador detecta uma subclasse de `ValueObject` percorrendo toda a cadeia de classes base. Uma classe que estende uma subclasse intermediária de `ValueObject` continua sendo reconhecida. O compilador também verifica se o ancestral encontrado é de fato o `ValueObject` exportado por `@ts-typed/core`, comparando o caminho do arquivo de declaração. Uma classe de mesmo nome vinda de outra biblioteca não conta.
 
 ## Criando os seus próprios value objects
 
 Qualquer conceito de domínio com representação em string pode seguir o mesmo padrão. Veja um value object para um número de CPF brasileiro que remove a formatação e expõe uma forma mascarada:
 
 ```ts
-import { ValueObject } from '@ts-typed/compiler';
+import { ValueObject } from '@ts-typed/core';
 
 export class CPF extends ValueObject {
   public constructor(raw: string) {

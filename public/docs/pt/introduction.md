@@ -6,7 +6,7 @@ O TS Typed transforma os tipos que você já escreve em TypeScript em garantias 
 
 O TS Typed é um conjunto de pacotes que trabalham juntos:
 
-- **@ts-typed/compiler** instrumenta o seu projeto TypeScript para que os valores em tempo de execução sejam verificados contra os tipos que o compilador já conhece.
+- **@ts-typed/core** instrumenta o seu projeto TypeScript para que os valores em tempo de execução sejam verificados contra os tipos que o compilador já conhece.
 - **@ts-typed/nestjs** integra essas verificações em aplicações NestJS.
 - **@ts-typed/validators** oferece value objects prontos para uso, como `Email`, que você pode usar diretamente nos seus tipos.
 

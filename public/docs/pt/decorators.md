@@ -1,6 +1,6 @@
 # Decoradores
 
-O TS Typed oferece um pequeno conjunto de decoradores que ajustam a forma como o compilador valida uma classe ou uma propriedade. Todos são importados de `@ts-typed/compiler`:
+O TS Typed oferece um pequeno conjunto de decoradores que ajustam a forma como o compilador valida uma classe ou uma propriedade. Todos são importados de `@ts-typed/core`:
 
 ```ts
 import {
@@ -10,7 +10,7 @@ import {
   ServerPopulated,
   TypeErrorResponse,
   AggregateErrors,
-} from '@ts-typed/compiler';
+} from '@ts-typed/core';
 ```
 
 Cada decorador sobrescreve um padrão para um único alvo. As configurações globais em `typets.config.json` continuam valendo para todo o resto.
@@ -60,7 +60,7 @@ Quando um campo de uma classe `ServerPopulated` falha na validação, o `StrictT
 
 ```ts
 import { Entity } from 'typeorm';
-import { ServerPopulated } from '@ts-typed/compiler';
+import { ServerPopulated } from '@ts-typed/core';
 
 @Entity({ name: 'todos' })
 @ServerPopulated()
@@ -76,7 +76,7 @@ No lado do NestJS, o `StrictTypeErrorFilter` do `@ts-typed/nestjs` lê essa flag
 `TypeErrorResponse` é um decorador de propriedade. Ele associa uma mensagem personalizada, voltada ao HTTP, e um código de status opcional a um campo específico:
 
 ```ts
-import { TypeErrorResponse } from '@ts-typed/compiler';
+import { TypeErrorResponse } from '@ts-typed/core';
 
 export class CreateUserDto {
   @TypeErrorResponse('Invalid email', 422)
@@ -95,7 +95,7 @@ Por si só, este pacote não tem nenhuma noção de HTTP. Quem transforma esses 
 `AggregateErrors()` é um decorador de classe. Ele faz a classe coletar **todas** as violações encontradas nela, em qualquer profundidade, em um único `AggregateStrictTypeError`, em vez do comportamento padrão fail-fast do TS Typed (só a primeira violação).
 
 ```ts
-import { AggregateErrors, AggregateStrictTypeError } from '@ts-typed/compiler';
+import { AggregateErrors, AggregateStrictTypeError } from '@ts-typed/core';
 
 @AggregateErrors()
 class CreateUserDto {

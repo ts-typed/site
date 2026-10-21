@@ -16,6 +16,7 @@
       "typescriptLabel": "TypeScript (código fonte)",
       "tscLabel": "tsc (código compilado que realmente vai rodar)",
       "typedLabel": "ts-typed (código com garantia de tipagem)",
+      "ariaLabel": "Comparação entre TypeScript e JavaScript",
       "typescript": "interface User {\n  id: number;\n  name: string;\n}\n\nfunction loadUser(user: User) {\n  return findUserById(user.id);\n}",
       "tsc": "function loadUser(user) {\n  return findUserById(user.id);\n}",
       "typed": "function loadUser(user) {\n  if (typeof user.name !== 'string') {\n    throw new StrictTypeError('user.name');\n  }\n  if (typeof user.id !== 'number') {\n    throw new StrictTypeError('user.id');\n  }\n  return findUserById(user.id);\n}"
@@ -39,7 +40,7 @@
       "body": "Sem decorators espalhados pelo modelo. O compiler encontra as fronteiras e mantém o contrato visível no código.",
       "code": "interface CreateUserDto {\n  email: Email;\n  name: string;\n}\n\nfunction createUser(dto: CreateUserDto) {\n  return users.create(dto);\n}\n\n// o tipo escrito em TS também é garantido em runtime."
     },
-    "metrics": { "stars": "Estrelas no GitHub", "downloads": "Downloads mensais no npm", "schemas": "Schemas duplicados", "types": "Contrato baseado em tipos" }
+    "metrics": { "stars": "Estrelas no GitHub", "downloads": "Downloads mensais no npm", "schemas": "Schemas duplicados", "types": "Contrato baseado em tipos", "ariaLabel": "Métricas do projeto" }
   },
   "docs": {
     "nav": {
@@ -50,15 +51,32 @@
       "decorators": "Decorators",
       "valueObject": "ValueObject",
       "generics": "Genéricos",
-      "nestjs": "Integração NestJS",
+      "nestjs": "NestJS",
       "validators": "Validadores",
       "limitations": "Limitações Conhecidas",
       "performance": "Performance e Benchmarks",
       "optimizations": "Otimizações",
       "version": "Versão da documentação",
+      "documentation": "Documentação",
+      "frameworks": "Frameworks",
       "menu": "Menu da documentação",
       "openMenu": "Abrir menu da documentação",
-      "closeMenu": "Fechar menu da documentação"
+      "closeMenu": "Fechar menu da documentação",
+      "typescript": "TypeScript",
+      "express": "Express",
+      "expand": "Expandir",
+      "collapse": "Recolher",
+      "implementation": "Implementação",
+      "requestsDtos": "Requisições e DTOs",
+      "responses": "Respostas",
+      "errors": "Erros",
+      "practicesExamples": "Práticas e Exemplos"
+    },
+    "navigation": {
+      "label": "Navegação da documentação",
+      "previous": "Anterior",
+      "next": "Próximo",
+      "deepen": "Aprofunde-se"
     }
   }
 }

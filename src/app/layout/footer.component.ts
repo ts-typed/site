@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
       <div class="mx-auto max-w-6xl px-4 flex flex-col gap-4 sm:flex-row sm:justify-between">
         <p>© {{ year }} TS Typed. Apache-2.0.</p>
         <div class="flex gap-4">
-          <a href="https://www.npmjs.com/package/@ts-typed/compiler" target="_blank" rel="noopener" class="hover:text-cyan">@ts-typed/compiler</a>
+          <a href="https://www.npmjs.com/package/@ts-typed/core" target="_blank" rel="noopener" class="hover:text-cyan">@ts-typed/core</a>
           <a href="https://www.npmjs.com/package/@ts-typed/nestjs" target="_blank" rel="noopener" class="hover:text-cyan">@ts-typed/nestjs</a>
           <a href="https://www.npmjs.com/package/@ts-typed/validators" target="_blank" rel="noopener" class="hover:text-cyan">@ts-typed/validators</a>
           <a href="https://github.com/ts-typed" target="_blank" rel="noopener" class="hover:text-cyan">GitHub</a>
