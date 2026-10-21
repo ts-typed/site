@@ -1,6 +1,12 @@
-# ts-typed/site
+<p align="center">
+  <a href="https://ts-typed.com" target="_blank" rel="noopener noreferrer">
+    <img src=".github/logo.svg" alt="ts-typed" width="260" />
+  </a>
+</p>
 
-The documentation and marketing website for [TS Typed](https://ts-typed.com) — `@ts-typed/compiler`, `@ts-typed/nestjs`, and `@ts-typed/validators`.
+# ts-typed/ts-typed.com
+
+The documentation and marketing website for [TS Typed](https://ts-typed.com) — `@ts-typed/core`, `@ts-typed/nestjs`, `@ts-typed/express`, and `@ts-typed/validators`.
 
 This is a standalone Angular 22 app (SSR via `@angular/ssr`), not a submodule of the main [ts-typed/ts-typed](https://github.com/ts-typed/ts-typed) repository. Full documentation content lives under `public/docs/{en,pt}/*.md`; each package's own README keeps a concise summary.
 
