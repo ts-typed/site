@@ -18,6 +18,41 @@ In most projects, the same contract is written twice: once as a TypeScript type 
 
 TS Typed removes the second copy. **The type you wrote is the contract.** If a value crosses a place where that type is declared and does not match it, the program throws instead of letting a malformed value flow silently into the rest of your code.
 
+## From type to JavaScript
+
+You write the type and ts-typed guarantees that it is applied.
+
+```ts
+interface User {
+  id: number;
+  name: string;
+}
+
+function loadUser(user: User) {
+  return findUserById(user.id);
+}
+```
+
+With `tsc`, interfaces disappear:
+
+```js
+function loadUser(user) {
+  return findUserById(user.id);
+}
+```
+
+With `ts-typed`, the generated JavaScript checks the contract before running the method:
+
+```js
+function loadUser(user) {
+  if (typeof user.name !== 'string') throw new StrictTypeError('user.name');
+  if (typeof user.id !== 'number') throw new StrictTypeError('user.id');
+  return findUserById(user.id);
+}
+```
+
+The generated snippet is simplified for readability; the compiler inserts the schema and protection automatically.
+
 ## Why not a schema library?
 
 Consider a typical DTO validated with a decorator-based library:

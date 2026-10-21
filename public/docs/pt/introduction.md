@@ -18,6 +18,41 @@ Na maioria dos projetos, o mesmo contrato é escrito duas vezes: uma como tipo T
 
 O TS Typed elimina a segunda cópia. **O tipo que você escreveu é o contrato.** Se um valor atravessa um ponto onde esse tipo é declarado e não corresponde a ele, o programa lança um erro em vez de deixar que um valor malformado se propague silenciosamente pelo resto do código.
 
+## Do tipo ao JavaScript
+
+Você escreve o tipo e o ts-typed garante que ele será aplicado.
+
+```ts
+interface User {
+  id: number;
+  name: string;
+}
+
+function loadUser(user: User) {
+  return findUserById(user.id);
+}
+```
+
+Com `tsc`, as interfaces desaparecem:
+
+```js
+function loadUser(user) {
+  return findUserById(user.id);
+}
+```
+
+Com `ts-typed`, o JavaScript gerado inclui a verificação do contrato antes de executar o método:
+
+```js
+function loadUser(user) {
+  if (typeof user.name !== 'string') throw new StrictTypeError('user.name');
+  if (typeof user.id !== 'number') throw new StrictTypeError('user.id');
+  return findUserById(user.id);
+}
+```
+
+O trecho gerado é resumido para facilitar a leitura; o compiler insere o schema e a proteção automaticamente.
+
 ## Por que não usar uma biblioteca de schema?
 
 Considere um DTO típico validado por uma biblioteca baseada em decorators:

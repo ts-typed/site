@@ -8,6 +8,15 @@
       "proof": "Feito para fronteiras de dados",
       "runtimeGuard": "o tipo também é garantido em runtime"
     },
+    "contract": {
+      "eyebrow": "Do tipo ao JavaScript",
+      "title": "O contrato continua no código gerado",
+      "body": "O tsc remove as interfaces. O ts-typed preserva o contrato e adiciona a verificação automaticamente.",
+      "note": "Você escreve o tipo e o ts-typed garante que ele será aplicado.",
+      "typescript": "interface User {\n  id: number;\n  name: string;\n}\n\nfunction loadUser(user: User) {\n  return findUserById(user.id);\n}",
+      "tsc": "function loadUser(user) {\n  return findUserById(user.id);\n}",
+      "typed": "function loadUser(user) {\n  if (typeof user.name !== 'string') {\n    throw new StrictTypeError('user.name');\n  }\n  if (typeof user.id !== 'number') {\n    throw new StrictTypeError('user.id');\n  }\n  return findUserById(user.id);\n}"
+    },
     "cta": { "start": "Comece agora", "readDocs": "Ler a documentação", "eyebrow": "Construa com confiança", "title": "Seu TypeScript pode fazer mais.", "body": "Comece com um projeto TypeScript puro, Express ou NestJS e mantenha segurança explícita em cada fronteira.", "performance": "Ver os benchmarks" },
     "features": {
       "eyebrow": "Uma camada de segurança, não outro schema",

@@ -27,6 +27,16 @@
     </div>
   </section>
 
+  <section class="landing-contract landing-section">
+    <div class="section-heading"><div><p class="eyebrow">{{ 'landing.contract.eyebrow' | translate }}</p><h2>{{ 'landing.contract.title' | translate }}</h2></div><p>{{ 'landing.contract.body' | translate }}</p></div>
+    <div class="contract-grid">
+      <article class="contract-card"><span class="contract-label">TypeScript</span><pre><code>{{ 'landing.contract.typescript' | translate }}</code></pre></article>
+      <article class="contract-card"><span class="contract-label">tsc</span><pre><code>{{ 'landing.contract.tsc' | translate }}</code></pre></article>
+      <article class="contract-card contract-card-typed"><span class="contract-label">ts-typed</span><pre><code>{{ 'landing.contract.typed' | translate }}</code></pre></article>
+    </div>
+    <p class="contract-note">{{ 'landing.contract.note' | translate }}</p>
+  </section>
+
   <section class="landing-stats" aria-label="Project metrics">
     <div><span class="stat-value">{{ stars() ?? '—' }}</span><span class="stat-label">{{ 'landing.metrics.stars' | translate }}</span></div>
     <div><span class="stat-value">{{ downloads() ?? '—' }}</span><span class="stat-label">{{ 'landing.metrics.downloads' | translate }}</span></div>
