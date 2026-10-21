@@ -68,6 +68,12 @@ pre,
   justify-content: space-between;
   padding: 0.75rem 1rem;
 }
+/* Keep the desktop breakpoint explicit: the base toolbar rule sets display:flex. */
+@media (min-width: 640px) {
+  .docs-mobile-toolbar {
+    display: none;
+  }
+}
 .docs-eyebrow,
 .eyebrow {
   color: var(--accent);
