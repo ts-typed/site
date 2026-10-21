@@ -13,6 +13,9 @@
       "title": "The contract stays in the generated code",
       "body": "tsc removes interfaces. ts-typed preserves the contract and adds the check automatically.",
       "note": "tsc removes the types. ts-typed guarantees that they are applied at runtime.",
+      "typescriptLabel": "TypeScript (source code)",
+      "tscLabel": "tsc (compiled code that actually runs)",
+      "typedLabel": "ts-typed (code with type guarantees)",
       "typescript": "interface User {\n  id: number;\n  name: string;\n}\n\nfunction loadUser(user: User) {\n  return findUserById(user.id);\n}",
       "tsc": "function loadUser(user) {\n  return findUserById(user.id);\n}",
       "typed": "function loadUser(user) {\n  if (typeof user.name !== 'string') {\n    throw new StrictTypeError('user.name');\n  }\n  if (typeof user.id !== 'number') {\n    throw new StrictTypeError('user.id');\n  }\n  return findUserById(user.id);\n}"
