@@ -11,30 +11,13 @@
       </div>
       <div class="landing-proof"><span>{{ 'landing.hero.proof' | translate }}</span><span class="proof-line"></span><code>TypeScript → Runtime</code></div>
     </div>
-    <div class="hero-code-card" aria-label="TypeScript example">
-      <div class="code-card-top"><span class="code-dots"><i></i><i></i><i></i></span><span>create-user.dto.ts</span><span class="code-badge">typed</span></div>
-      <pre><code><span class="code-keyword">interface</span> <span class="code-type">CreateUserDto</span> {{ '{' }}
-  email: <span class="code-type">Email</span>;
-  name: <span class="code-type">string</span>;
-{{ '}' }}
-
-<span class="code-keyword">function</span> <span class="code-function">createUser</span>(dto: <span class="code-type">CreateUserDto</span>) {{ '{' }}
-  <span class="code-keyword">return</span> users.create(dto);
-{{ '}' }}
-
-<span class="code-comment">// the compiler enforces this type at runtime</span></code></pre>
-      <div class="code-card-foot"><span class="success-mark">✓</span> {{ 'landing.hero.runtimeGuard' | translate }}</div>
+    <div class="hero-code-card hero-contract-card" aria-label="TypeScript to JavaScript comparison">
+      <div class="code-card-top"><span class="code-dots"><i></i><i></i><i></i></span><span>User contract</span><span class="code-badge">runtime</span></div>
+      <div class="hero-contract-block"><span class="hero-contract-label">TypeScript</span><pre><code>{{ 'landing.contract.typescript' | translate }}</code></pre></div>
+      <div class="hero-contract-block"><span class="hero-contract-label">tsc</span><pre><code>{{ 'landing.contract.tsc' | translate }}</code></pre></div>
+      <div class="hero-contract-block hero-contract-block-typed"><span class="hero-contract-label">ts-typed</span><pre><code>{{ 'landing.contract.typed' | translate }}</code></pre></div>
+      <div class="code-card-foot"><span class="success-mark">✓</span> {{ 'landing.contract.note' | translate }}</div>
     </div>
-  </section>
-
-  <section class="landing-contract landing-section">
-    <div class="section-heading"><div><p class="eyebrow">{{ 'landing.contract.eyebrow' | translate }}</p><h2>{{ 'landing.contract.title' | translate }}</h2></div><p>{{ 'landing.contract.body' | translate }}</p></div>
-    <div class="contract-grid">
-      <article class="contract-card"><span class="contract-label">TypeScript</span><pre><code>{{ 'landing.contract.typescript' | translate }}</code></pre></article>
-      <article class="contract-card"><span class="contract-label">tsc</span><pre><code>{{ 'landing.contract.tsc' | translate }}</code></pre></article>
-      <article class="contract-card contract-card-typed"><span class="contract-label">ts-typed</span><pre><code>{{ 'landing.contract.typed' | translate }}</code></pre></article>
-    </div>
-    <p class="contract-note">{{ 'landing.contract.note' | translate }}</p>
   </section>
 
   <section class="landing-stats" aria-label="Project metrics">
